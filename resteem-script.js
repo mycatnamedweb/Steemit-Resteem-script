@@ -40,7 +40,7 @@ let resteemsCount = 0;
 
 // =============================== startup check
 const currentLocation = window.location.href;
-let startupOk;
+let startupOk = true;
 if (currentLocation.indexOf('https://steemit.com') == -1 || currentLocation.indexOf(ACCOUNT_NAME) == -1) {
   alert('Error. You have to run this script on Steemit, on your Free Resteems post.');
   startupOk = false;
