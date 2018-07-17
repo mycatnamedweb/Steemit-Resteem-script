@@ -1,10 +1,10 @@
 // =========================================================================
 // CHANGE THESE vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-const RANDOM_COMMENT_AFTER_RESTEEM_1 = `Done guys, thanks`;
-const RANDOM_COMMENT_AFTER_RESTEEM_2 = `Done! Thanks for using my service.`;
-const RANDOM_COMMENT_AFTER_RESTEEM_3 = `All done until here guys :-D`
-const ACCOUNT_NAME = 'gaottantacinque'
+const RANDOM_COMMENT_AFTER_RESTEEM_1 = `Done guys, thanks! :D`;
+const RANDOM_COMMENT_AFTER_RESTEEM_2 = `Done! Thanks for using my free resteem service! :)`;
+const RANDOM_COMMENT_AFTER_RESTEEM_3 = `All done until here guys`
+const ACCOUNT_NAME = 'cribbio'
 
 const MAX_LINKS_PER_USER = 3;
 const HOW_MANY_USERS_TO_UPVOTE = 10;
@@ -12,7 +12,7 @@ const DELETE_OLD_SEPARATOR_WHEN_NEW_COMMENTS = false;
 const OPEN_USER_LINK_TO_RESTEEM_EVERY_N_MILLISECONDS = 13000;
 
 const SPECIAL_TREAT_IF_USER_RESTEEMS = true;
-const KEYWORD_IN_COMMENT_TO_GET_UPVOTE_AND_FOLLOW_1 = 'resteemed you';
+const KEYWORD_IN_COMMENT_TO_GET_UPVOTE_AND_FOLLOW_1 = 'resteemd you';
 const KEYWORD_IN_COMMENT_TO_GET_UPVOTE_AND_FOLLOW_2 = 're-steemed you';
 const KEYWORD_IN_COMMENT_TO_GET_UPVOTE_AND_FOLLOW_3 = 'reblogged you';
 const KEYWORD_IN_COMMENT_TO_GET_UPVOTE_AND_FOLLOW_4 = 'resteemed';
@@ -42,7 +42,7 @@ let resteemsCount = 0;
 const currentLocation = window.location.href;
 let startupOk = true;
 if (currentLocation.indexOf('https://steemit.com') == -1 || currentLocation.indexOf(ACCOUNT_NAME) == -1) {
-  alert('Error. You have to run this script on Steemit, on your Free Resteems post.');
+  alert('Error!\nYou have to run this script on Steemit, on your Free Resteems post.');
   startupOk = false;
 }
 
@@ -216,6 +216,7 @@ async function startResteems() {
       if(idx < users.length) {
         execService(users[idx], toResteem[users[idx]]);
         idx++;
+        buildUI();
       } else if (idx === users.length) {
         idx = 8888;
         setTimeout(() => {
@@ -231,6 +232,7 @@ async function startResteems() {
               Failed resteems: ${JSON.stringify(failed)}.
               Warnings: ${warnings.length ? JSON.stringify(warnings) : 'none.'}
             `);
+            buildUI();
           } else if (warnings.length) {
             console.error(`There are warnings. \n${JSON.stringify(warnings)}`);
           }
@@ -323,6 +325,11 @@ async function execService(user, link) {
 }
 
 // ===============================  BASIC UI
+const clearErrors = () => {
+  errorsToShowOnUI = [];
+  buildUI();
+};
+
 async function buildUI () {
   let divToAdd;
   let prevState;
@@ -337,23 +344,33 @@ async function buildUI () {
     console.log('Refreshing the UI ..');
   }
   const content = `
+    <script>
+      const clearErrors = () => { console.log(1);
+        errorsToShowOnUI = [];
+        ;
+      };
+    </script>
     <h3 style="margin:5px auto 20px">
       <b style="color:#8A2BE2">${ACCOUNT_NAME}</b>
     </h3>
     <div>
     <h5>RESTEEM SERVICE STATUS:</h5>
-    <div style="float:right;padding:5px;border:thin solid green">Resteemed: ${resteemsCount}</div>
-    <div style="max-height:600px;border:thin solid grey;overflow:auto;padding:15px;margin-left:10px">
+    <div style="float:right;padding:5px;border:thin solid green;margin-left:10px">Resteemed: ${resteemsCount}</div>
+    <div style="max-height:600px;border:thin solid grey;overflow:auto;padding:15px">
       ${errorsToShowOnUI.length ?
-        `<p style="color:red">ERRORS</p>
+        `<p id="errors" style="color:red">ERRORS</p>
          <ul>
            ${errorsToShowOnUI.map(err => `<li>${err}</li>`).reverse().join('')}
          </ul>
         `
         :
-        `<p style="color:green">${users.length ? 'OK' : 'No comments yet..'}</p>`
+        `<p id="ok" style="color:green">${users.length ? 'OK' : 'No comments yet..'}</p>`
       }
     </div>
+    ${
+      errorsToShowOnUI.length ?
+      `<p style="color:orange;margin-left:60px">To remove these errors execute in the console: clearErrors()</p>` : ''
+    }
   `;
   const topDiv = document.getElementById('content');
   if (divToAdd) {
