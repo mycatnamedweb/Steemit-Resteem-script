@@ -38,6 +38,14 @@ let failed = [], warnings = [];
 let errorsToShowOnUI = [];
 let resteemsCount = 0;
 
+// =============================== startup check
+const currentLocation = window.location.href;
+let startupOk;
+if (currentLocation.indexOf('https://steemit.com') == -1 || currentLocation.indexOf(ACCOUNT_NAME) == -1) {
+  alert('Error. You have to run this script on Steemit, on your Free Resteems post.');
+  startupOk = false;
+}
+
 // ================================ UTILITIES
 function nap(durationMs) {
   console.log('Taking a nap..');
@@ -360,7 +368,9 @@ async function buildUI () {
   }
 }
 
-setTimeout(() => processUsersComments(), 3600000); // 1 HOUR
-setTimeout(() => buildUI(), 60000); // 1 min
-buildUI();
-processUsersComments();
+if (startupOk) {
+  setTimeout(() => processUsersComments(), 3600000); // 1 HOUR
+  setTimeout(() => buildUI(), 60000); // 1 min
+  buildUI();
+  processUsersComments();
+}
