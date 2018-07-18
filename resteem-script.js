@@ -4,7 +4,7 @@
 const RANDOM_COMMENT_AFTER_RESTEEM_1 = `Done guys, thanks! :D`;
 const RANDOM_COMMENT_AFTER_RESTEEM_2 = `Done! Thanks for using my free resteem service! :)`;
 const RANDOM_COMMENT_AFTER_RESTEEM_3 = `All done until here guys`
-const ACCOUNT_NAME = 'cribbio'
+const ACCOUNT_NAME = 'YOUR_ACCOUNT_NAME_HERE' // ( eg. gaottantacinque - no @ )      <<<<<~~~~~~~~~~~~~~~~~~~~~~~====###
 
 const MAX_LINKS_PER_USER = 3;
 const HOW_MANY_USERS_TO_UPVOTE = 10;
