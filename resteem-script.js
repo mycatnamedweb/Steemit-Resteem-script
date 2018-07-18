@@ -1,15 +1,18 @@
 // =========================================================================
 // CHANGE THESE vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
+const ACCOUNT_NAME = 'YOUR_ACCOUNT_NAME_HERE' // ( eg. gaottantacinque - no @ ) <<~~---===## MANDATORY
+
 const RANDOM_COMMENT_AFTER_RESTEEM_1 = `Done guys, thanks! :D`;
 const RANDOM_COMMENT_AFTER_RESTEEM_2 = `Done! Thanks for using my free resteem service! :)`;
 const RANDOM_COMMENT_AFTER_RESTEEM_3 = `All done until here guys`
-const ACCOUNT_NAME = 'YOUR_ACCOUNT_NAME_HERE' // ( eg. gaottantacinque - no @ )      <<<<<~~~~~~~~~~~~~~~~~~~~~~~====###
+const MENTION_USERS_IN_SEPARATORS = true;
+const DELETE_OLD_SEPARATOR_WHEN_NEW_COMMENTS = false;
 
 const MAX_LINKS_PER_USER = 3;
-const HOW_MANY_USERS_TO_UPVOTE = 10;
-const DELETE_OLD_SEPARATOR_WHEN_NEW_COMMENTS = false;
-const OPEN_USER_LINK_TO_RESTEEM_EVERY_N_MILLISECONDS = 13000;
+
+const SPECIAL_TREAT_TO_FIRSTCOMERS = true;
+const HOW_MANY_FIRSTCOMERS = 10;
 
 const SPECIAL_TREAT_IF_USER_RESTEEMS = true;
 const KEYWORD_IN_COMMENT_TO_GET_UPVOTE_AND_FOLLOW_1 = 'resteemed';
@@ -17,7 +20,7 @@ const KEYWORD_IN_COMMENT_TO_GET_UPVOTE_AND_FOLLOW_2 = 're-steemed';
 const KEYWORD_IN_COMMENT_TO_GET_UPVOTE_AND_FOLLOW_3 = 'reblogged';
 const KEYWORD_IN_COMMENT_TO_GET_UPVOTE_AND_FOLLOW_4 = '~#_ADD KEYWORD HERE IF NEEDED#~';
 
-const SPECIAL_TREAT_TO_FIRST_TEN = true;
+const OPEN_USER_LINK_TO_RESTEEM_EVERY_N_MILLISECONDS = 13000;
 
 // CHANGE THESE ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 // =========================================================================
@@ -37,13 +40,14 @@ let lastAnchor = null;
 let failed = [], warnings = [];
 let errorsToShowOnUI = [];
 let resteemsCount = 0;
+const resteemedLinksOnThisPost = [];
 
 // =============================== startup check
 const currentLocation = window.location.href;
 let startupOk = true;
 if (currentLocation.indexOf('https://steemit.com') == -1 || currentLocation.indexOf(ACCOUNT_NAME) == -1) {
-  alert('Error!\nYou have to run this script on Steemit, on your newly created post..');
   startupOk = false;
+  alert(`Error!\n\n${YOUR_ACCOUNT_NAME_HERE} you have to run this script on Steemit, on your newly created post..`);
 }
 
 // leave check
@@ -103,15 +107,16 @@ const getComment = () => {
 }
 
 // ===============================  [[[[[[ ENTRY POINT ]]]]]]
-let wPost = open(window.location.href,'_blank');
-wPost.addEventListener('load', () => {
-  if (startupOk) {
-    buildUI();
-    setTimeout(() => processUsersComments(), 5000);
-    setInterval(() => processUsersComments(), 3600000); // 1 HOUR
-    setInterval(() => buildUI(), 60000); // 1 min
-  }
-});
+let wPost;
+if (startupOk) {
+  wPost = open(window.location.href,'_blank');
+  wPost.addEventListener('load', () => {
+      setTimeout(() => processUsersComments(), 5000); // little delay to let the UI build first
+      setInterval(() => processUsersComments(), 3600000); // 1 HOUR
+      buildUI();
+      setInterval(() => buildUI(), 60000); // 1 min
+  });
+}
 
 async function processUsersComments() {
   readCommentsAndAddSeparator(() => {
@@ -162,7 +167,7 @@ async function readCommentsAndAddSeparator(k) {
             const parentArr = parent.split('/');
             const notAchildComment = parentArr[1].indexOf(`/re-${ACCOUNT_NAME}`);
             const user = parentArr[0].substr(2, parentArr[0].length -1);
-            if(firstTenToUpvAndFollow.length < HOW_MANY_USERS_TO_UPVOTE
+            if(firstTenToUpvAndFollow.length < HOW_MANY_FIRSTCOMERS
                 && firstTenToUpvAndFollow.indexOf(user) == -1) {
               firstTenToUpvAndFollow.push(user);
             }
@@ -206,18 +211,22 @@ async function replyToPost(k) {
     }
     oldSeparatorDelBtn = null;
     let myComment = getComment();
+    if (MENTION_USERS_IN_SEPARATORS) {
+      myComment += `\n@${users.join(', @')}`;
+    }
     console.log(`Adding comment: ${myComment}`);
-    let replyBtn = wPost.document.getElementsByClassName('PostFull__reply')[0]
+    let replyBtn = document.getElementsByClassName('PostFull__reply')[0]
       .getElementsByTagName('a')[0];
     replyBtn.click();
     await nap(500);
-    let textarea = wPost.document.getElementsByTagName('textarea')[0];
+    let textarea = document.getElementsByTagName('textarea')[0];
     setNativeValue(textarea, myComment);
     textarea.dispatchEvent(new Event('input', { bubbles: true }));
-    await nap(100);
-    let postReplyBtn = wPost.document.querySelectorAll('[type=submit]')[1];
+    await nap(500);
+    let postReplyBtn = document.querySelectorAll('[type=submit]')[0];
+    console.log(`Sumbitting reply..`);
     postReplyBtn.click();
-    await nap(200);
+    await nap(1000);
   } catch (err) {
     errorsToShowOnUI.push(`${new Date()} -- Error adding separator. Cause: ${err} \nContinuing..`);
   }
@@ -251,7 +260,7 @@ async function startResteems() {
             `);
             buildUI();
             wPost && wPost.close && wPost.close();
-            wPost = open(window.location.href, '_blank');
+            setTimeout(() => wPost = open(window.location.href, '_blank'), 10000);
           } else if (warnings.length) {
             console.error(`There are warnings. \n${JSON.stringify(warnings)}`);
           }
@@ -278,7 +287,7 @@ async function execService(user, link) {
       && currentComment.parentElement.parentElement.innerText
       && currentComment.parentElement.parentElement.innerText.toLowerCase();
     if ( (SPECIAL_TREAT_IF_USER_RESTEEMS && userSaysHeResteemed(userMsg)) ||
-         (SPECIAL_TREAT_TO_FIRST_TEN && userInFirstTen_index !== -1 ) ) {
+         (SPECIAL_TREAT_TO_FIRSTCOMERS && userInFirstTen_index !== -1 ) ) {
       console.log(`SPECIAL TREAT for user ${user}.\n 1. Upvoting post`);
       const upvoteBtn = w.document.getElementById('upvote_button')
       if (!upvoteBtn) {
@@ -328,13 +337,19 @@ async function execService(user, link) {
     const resteemOk = w.document.getElementsByClassName('Reblog__button Reblog__button-active')[0];
     if(resteemOk && confirmForm) {
       console.log('==> SUCCESS.');
-      resteemsCount++;
+      if (resteemedLinksOnThisPost.indexOf(link) == -1) {
+        resteemedLinksOnThisPost.push(link);
+        resteemsCount++;
+      }
     } else if (resteemOk && !confirmForm) {
       errorsToShowOnUI.push(`${new Date()} -- Post Was already resteemed. User: ${user}`);
     } else {
       const msg = `FAILED? Grey Resteem for ${user} -> ${link}`;
       console.log(msg);
-      resteemsCount++;
+      if (resteemedLinksOnThisPost.indexOf(link) == -1) {
+        resteemedLinksOnThisPost.push(link);
+        resteemsCount++;
+      }
     }
   } catch(err) {
       errorsToShowOnUI.push(`${new Date()} -- Something went wrong processing post for user ${user}. Error: `, err);
@@ -402,8 +417,14 @@ async function buildUI () {
     divToAdd.style.padding = '5px';
     divToAdd.innerHTML = content;
     document.body.insertBefore(divToAdd, document.body.firstChild);
-    console.log('UI created. Now getting rid of steemit content..');
-    document.getElementById('content').innerHTML = '';
+    console.log('UI created. Now getting rid of some outdated steemit content..');
+    document.getElementsByClassName('Post_comments__content')[0].innerHTML = '';
+    document.getElementsByClassName('PostFull__time_author_category_large vcard')[0].innerHTML = '';
+    document.getElementsByClassName('PostFull__body entry-content')[0].innerHTML = '';
+    document.getElementsByClassName('PostFull__time_author_category vcard')[0].innerHTML = '';
+    document.getElementsByClassName('columns medium-12 large-2 ')[0].innerHTML = '';
+    document.getElementsByClassName('PostFull__responses')[0].innerHTML = '';
+    document.getElementsByClassName('Header')[0].innerHTML = '';
   } else {
     injectedDiv.innerHTML = content;
     console.log('UI refreshed');
