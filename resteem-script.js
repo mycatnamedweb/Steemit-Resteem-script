@@ -46,6 +46,12 @@ if (currentLocation.indexOf('https://steemit.com') == -1 || currentLocation.inde
   startupOk = false;
 }
 
+// leave check
+window.onbeforeunload = function() {
+  return "Dude, are you sure you want to leave? Think of the kittens!";
+}
+
+
 // ================================ UTILITIES
 function nap(durationMs) {
   console.log('Taking a nap..');
@@ -340,6 +346,7 @@ async function buildUI () {
     divToAdd = document.createElement('div');
     divToAdd.id = 'injected-ui';
     divToAdd.style.padding = '20px'
+    divToAdd.style['background-color'] = '#333333';
   } else {
     console.log('Refreshing the UI ..');
   }
@@ -354,12 +361,14 @@ async function buildUI () {
       <b style="color:#8A2BE2">${ACCOUNT_NAME}</b>
     </h3>
     <div>
-    <h5>RESTEEM SERVICE STATUS:</h5>
-    <div style="float:right;padding:5px;border:thin solid green;margin-left:10px">Resteemed: ${resteemsCount}</div>
+    <h5 style="color:#fcfcfc">RESTEEM SERVICE STATUS:</h5>
+    <div style="float:right;padding:5px;border:thin solid green;margin-left:10px;color:#fcfcfc">
+      Resteemed: ${resteemsCount}
+    </div>
     <div style="max-height:600px;border:thin solid grey;overflow:auto;padding:15px">
       ${errorsToShowOnUI.length ?
         `<p id="errors" style="color:red">ERRORS</p>
-         <ul>
+         <ul style="color:#fcfcfc">
            ${errorsToShowOnUI.map(err => `<li>${err}</li>`).reverse().join('')}
          </ul>
         `
@@ -369,7 +378,7 @@ async function buildUI () {
     </div>
     ${
       errorsToShowOnUI.length ?
-      `<p style="color:orange;margin-left:60px">To remove these errors execute in the console: clearErrors()</p>` : ''
+      `<p style="color:orange;margin-left:60px">To remove these errors execute in the console: &nbsp;<i>clearErrors()</i></p>` : ''
     }
   `;
   const topDiv = document.getElementById('content');
