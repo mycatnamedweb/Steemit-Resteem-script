@@ -20,7 +20,8 @@ const KEYWORD_IN_COMMENT_TO_GET_UPVOTE_AND_FOLLOW_2 = 're-steemed';
 const KEYWORD_IN_COMMENT_TO_GET_UPVOTE_AND_FOLLOW_3 = 'reblogged';
 const KEYWORD_IN_COMMENT_TO_GET_UPVOTE_AND_FOLLOW_4 = '~#_ADD KEYWORD HERE IF NEEDED#~';
 
-const OPEN_USER_LINK_TO_RESTEEM_EVERY_N_MILLISECONDS = 13000;
+const CHECK_NEW_COMMENTS_EVERY_N_MILLISECONS = 3600000;  // 1 HOUR
+const OPEN_USER_LINK_TO_RESTEEM_EVERY_N_MILLISECONDS = 13000; // 13 seconds
 
 // CHANGE THESE ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 // =========================================================================
@@ -109,31 +110,34 @@ const getComment = () => {
 // ===============================  [[[[[[ ENTRY POINT ]]]]]]
 let wPost;
 if (startupOk) {
-  wPost = open(window.location.href,'_blank');
-  wPost.addEventListener('load', () => {
-      setTimeout(() => processUsersComments(), 5000); // little delay to let the UI build first
-      setInterval(() => processUsersComments(), 3600000); // 1 HOUR
-      buildUI();
-      setInterval(() => buildUI(), 60000); // 1 min
-  });
+    buildUI();
+    setInterval(() => buildUI(), 10 * 60000); // 5 mins
+    setTimeout(() => processUsersComments(), 5000); // let the UI build first
+    setInterval(() => processUsersComments(), CHECK_NEW_COMMENTS_EVERY_N_MILLISECONS);
 }
 
 async function processUsersComments() {
-  readCommentsAndAddSeparator(() => {
+  if (!wPost || !wPost.close) {
+    console.log(`Opening post ${window.location.href} in a new tab..`);
+    wPost = open(window.location.href,'_blank');
+    wPost.addEventListener('load', () => setTimeout(() => processUsersComments(), 5000));
+    return;
+  }
+  readComments(() => {
     users.length && replyToPost(() => {
       users.length && startResteems();
     });
   });
 }
 
-async function readCommentsAndAddSeparator(k) {
+async function readComments(k) {
   try {
     oldSeparatorDelBtn = null;
     toResteem = {};
     users = [];
     firstTenToUpvAndFollow = [];
     const commentsSection = wPost.document.getElementsByClassName('Post_comments__content')[0];
-    if (!commentsSection) errorsToShowOnUI.push(`${new Date()} --Cannot run readCommentsAndAddSeparator on this page, no comments section!`);
+    if (!commentsSection) errorsToShowOnUI.push(`${new Date()} -- Cannot run readComments on this page: "${wPost.window.location.href}".<br>No comments section found.`);
     anchorsComments = commentsSection.getElementsByTagName('a');
     commentIds = Object.keys(anchorsComments);
     lastAnchor = anchorsComments[commentIds[commentIds.length - 5]];
@@ -189,6 +193,7 @@ async function readCommentsAndAddSeparator(k) {
       console.log(`Links to resteem: ${Object.keys(toResteem).length} -->> ${JSON.stringify(toResteem)}`);
     }
     users = Object.keys(toResteem);
+    !users.length && console.log('---- END ----');
     k();
   } catch (err) {
     errorsToShowOnUI.push(`${new Date()} -- Error reading comments on post. Cause: ${err}`);
@@ -260,7 +265,7 @@ async function startResteems() {
             `);
             buildUI();
             wPost && wPost.close && wPost.close();
-            setTimeout(() => wPost = open(window.location.href, '_blank'), 10000);
+            setTimeout(() => wPost = open(window.location.href, '_blank'), 300000);
           } else if (warnings.length) {
             console.error(`There are warnings. \n${JSON.stringify(warnings)}`);
           }
@@ -430,3 +435,8 @@ async function buildUI () {
     console.log('UI refreshed');
   }
 }
+
+// MANUAL COMMANDS:
+// processUsersComments()
+// clearErrors()
+// buildUI()
