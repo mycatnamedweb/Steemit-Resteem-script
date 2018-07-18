@@ -12,10 +12,10 @@ const DELETE_OLD_SEPARATOR_WHEN_NEW_COMMENTS = false;
 const OPEN_USER_LINK_TO_RESTEEM_EVERY_N_MILLISECONDS = 13000;
 
 const SPECIAL_TREAT_IF_USER_RESTEEMS = true;
-const KEYWORD_IN_COMMENT_TO_GET_UPVOTE_AND_FOLLOW_1 = 'resteemd you';
-const KEYWORD_IN_COMMENT_TO_GET_UPVOTE_AND_FOLLOW_2 = 're-steemed you';
-const KEYWORD_IN_COMMENT_TO_GET_UPVOTE_AND_FOLLOW_3 = 'reblogged you';
-const KEYWORD_IN_COMMENT_TO_GET_UPVOTE_AND_FOLLOW_4 = 'resteemed';
+const KEYWORD_IN_COMMENT_TO_GET_UPVOTE_AND_FOLLOW_1 = 'resteemed';
+const KEYWORD_IN_COMMENT_TO_GET_UPVOTE_AND_FOLLOW_2 = 're-steemed';
+const KEYWORD_IN_COMMENT_TO_GET_UPVOTE_AND_FOLLOW_3 = 'reblogged';
+const KEYWORD_IN_COMMENT_TO_GET_UPVOTE_AND_FOLLOW_4 = '~#_ADD KEYWORD HERE IF NEEDED#~';
 
 const SPECIAL_TREAT_TO_FIRST_TEN = true;
 
@@ -42,7 +42,7 @@ let resteemsCount = 0;
 const currentLocation = window.location.href;
 let startupOk = true;
 if (currentLocation.indexOf('https://steemit.com') == -1 || currentLocation.indexOf(ACCOUNT_NAME) == -1) {
-  alert('Error!\nYou have to run this script on Steemit, on your Free Resteems post.');
+  alert('Error!\nYou have to run this script on Steemit, on your newly created post..');
   startupOk = false;
 }
 
@@ -103,6 +103,16 @@ const getComment = () => {
 }
 
 // ===============================  [[[[[[ ENTRY POINT ]]]]]]
+let wPost = open(window.location.href,'_blank');
+wPost.addEventListener('load', () => {
+  if (startupOk) {
+    buildUI();
+    setTimeout(() => processUsersComments(), 5000);
+    setInterval(() => processUsersComments(), 3600000); // 1 HOUR
+    setInterval(() => buildUI(), 60000); // 1 min
+  }
+});
+
 async function processUsersComments() {
   readCommentsAndAddSeparator(() => {
     users.length && replyToPost(() => {
@@ -117,7 +127,7 @@ async function readCommentsAndAddSeparator(k) {
     toResteem = {};
     users = [];
     firstTenToUpvAndFollow = [];
-    const commentsSection = document.getElementsByClassName('Post_comments__content')[0];
+    const commentsSection = wPost.document.getElementsByClassName('Post_comments__content')[0];
     if (!commentsSection) errorsToShowOnUI.push(`${new Date()} --Cannot run readCommentsAndAddSeparator on this page, no comments section!`);
     anchorsComments = commentsSection.getElementsByTagName('a');
     commentIds = Object.keys(anchorsComments);
@@ -144,9 +154,10 @@ async function readCommentsAndAddSeparator(k) {
           }
           return;
         }
-        const rightLink = anchor.href.split('/').length > 4 && notMine(anchor);
-        const parent = anchor.offsetParent.id;
-        if (anchor.href.indexOf('https://steemit.com/') !== -1 && parent && rightLink) {
+        const rightLink = anchor.href && anchor.href.split('/').length > 4 && notMine(anchor);
+        const parent = anchor.offsetParent && anchor.offsetParent.id;
+        if (anchor.href && anchor.href.indexOf('https://steemit.com/') !== -1
+            && parent && rightLink) {
           try {
             const parentArr = parent.split('/');
             const notAchildComment = parentArr[1].indexOf(`/re-${ACCOUNT_NAME}`);
@@ -186,7 +197,7 @@ async function replyToPost(k) {
         console.log('Deleting old separator since there are new comments to process..');
         oldSeparatorDelBtn.click();
         await nap(2000);
-        const confirmBtn = document.getElementsByClassName('ConfirmTransactionForm')[0].children[4];
+        const confirmBtn = wPost.document.getElementsByClassName('ConfirmTransactionForm')[0].children[4];
         confirmBtn.click();
         await nap(3000);
       } catch (err) {
@@ -196,15 +207,15 @@ async function replyToPost(k) {
     oldSeparatorDelBtn = null;
     let myComment = getComment();
     console.log(`Adding comment: ${myComment}`);
-    let replyBtn = document.getElementsByClassName('PostFull__reply')[0]
+    let replyBtn = wPost.document.getElementsByClassName('PostFull__reply')[0]
       .getElementsByTagName('a')[0];
     replyBtn.click();
     await nap(500);
-    let textarea = document.getElementsByTagName('textarea')[0];
+    let textarea = wPost.document.getElementsByTagName('textarea')[0];
     setNativeValue(textarea, myComment);
     textarea.dispatchEvent(new Event('input', { bubbles: true }));
     await nap(100);
-    let postReplyBtn = document.querySelectorAll('[type=submit]')[1];
+    let postReplyBtn = wPost.document.querySelectorAll('[type=submit]')[1];
     postReplyBtn.click();
     await nap(200);
   } catch (err) {
@@ -239,6 +250,8 @@ async function startResteems() {
               Warnings: ${warnings.length ? JSON.stringify(warnings) : 'none.'}
             `);
             buildUI();
+            wPost && wPost.close && wPost.close();
+            wPost = open(window.location.href, '_blank');
           } else if (warnings.length) {
             console.error(`There are warnings. \n${JSON.stringify(warnings)}`);
           }
@@ -258,7 +271,7 @@ async function execService(user, link) {
     if (userInFirstTen_index !== -1) {
       firstTenToUpvAndFollow.splice(userInFirstTen_index, 1);
     }
-    const currentComment = document.getElementsByClassName('Post_comments__content')[0]
+    const currentComment = wPost.document.getElementsByClassName('Post_comments__content')[0]
       .querySelectorAll(`[href='${link}']`)[0];
     const userMsg = currentComment && currentComment.parentElement
     && currentComment.parentElement.parentElement
@@ -361,6 +374,9 @@ async function buildUI () {
       <b style="color:#8A2BE2">${ACCOUNT_NAME}</b>
     </h3>
     <div>
+    <small style="color:yellow;float:right;margin-right:10px;margin-top:-50px">
+      Do not close or refresh this tab unless you want to stop the script
+    </small>
     <h5 style="color:#fcfcfc">RESTEEM SERVICE STATUS:</h5>
     <div style="float:right;padding:5px;border:thin solid green;margin-left:10px;color:#fcfcfc">
       Resteemed: ${resteemsCount}
@@ -386,17 +402,10 @@ async function buildUI () {
     divToAdd.style.padding = '5px';
     divToAdd.innerHTML = content;
     document.body.insertBefore(divToAdd, document.body.firstChild);
-    document.getElementsByTagName('header')[0].style.position = 'relative';
-    console.log('UI created');
+    console.log('UI created. Now getting rid of steemit content..');
+    document.getElementById('content').innerHTML = '';
   } else {
     injectedDiv.innerHTML = content;
     console.log('UI refreshed');
   }
-}
-
-if (startupOk) {
-  setTimeout(() => processUsersComments(), 3600000); // 1 HOUR
-  setTimeout(() => buildUI(), 60000); // 1 min
-  buildUI();
-  processUsersComments();
 }
