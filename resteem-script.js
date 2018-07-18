@@ -48,7 +48,7 @@ const currentLocation = window.location.href;
 let startupOk = true;
 if (currentLocation.indexOf('https://steemit.com') == -1 || currentLocation.indexOf(ACCOUNT_NAME) == -1) {
   startupOk = false;
-  alert(`Error!\n\n${YOUR_ACCOUNT_NAME_HERE} you have to run this script on Steemit, on your newly created post..`);
+  alert(`Error!\n\n${ACCOUNT_NAME} you have to run this script on Steemit, on your newly created post..`);
 }
 
 // leave check
