@@ -28,7 +28,7 @@ const OPEN_USER_LINK_TO_RESTEEM_EVERY_N_MILLISECONDS = 13000; // 13 seconds
 
 
 
-/* VERSION 1.0 */
+/* VERSION 1.01 */
 
 // =============================== VARS
 let oldSeparatorDelBtn = null;
@@ -107,17 +107,6 @@ const getComment = () => {
   return comments[randomId];
 }
 
-const removeDoNotCloseWarning = (wPost) => {
-  try {
-    console.log('Removing donotclosewarning from other tab..');
-    wPost.document.getElementById('donotclosewarning').innerHTML = '<p style="color:green">This can now be closed if you want</p>';
-    wPost.document.getElementById('donotclosewarning').style.border = '1px solid green';
-    wPost.document.getElementById('donotclosewarning').style.padding = '10px';
-  } catch (err) {
-    console.error(`Error in removeDoNotCloseWarning: ${err}`);
-  }
-}
-
 const addDoNotCloseWarning = (wPost) => {
   try {
     if (!wPost) throw new Error(`Reference to the post window was missing in addDoNotCloseWarning.`);
@@ -145,7 +134,6 @@ if (startupOk) {
 }
 
 async function processUsersComments() {
-  console.log('processUsersComments called..'); // TEMP // DEBUG
   if (!wPost || !wPost.close) {
     console.log(`Opening post ${window.location.href} in a new tab..`);
     wPost = open(window.location.href,'_blank');
@@ -210,7 +198,7 @@ async function readComments(k) {
             if(Object.keys(toResteem).indexOf(user) == -1 && notAchildComment) {
               let added = false;
               'a,'.repeat(MAX_LINKS_PER_USER - 1).split(',').forEach((_,id) => {
-                const userAlias = `${user}${id > 0 ? `-${id}` : ''}`; // user, user-1, user-2
+                const userAlias = `${user}${id > 0 ? `~${id}` : ''}`; // user, user~1, user~2
                 if (!added && toResteem[userAlias] == undefined) {
                   toResteem[userAlias] = anchor.href;
                   added = true;
@@ -255,7 +243,12 @@ async function replyToPost(k) {
     oldSeparatorDelBtn = null;
     let myComment = getComment();
     if (MENTION_USERS_IN_SEPARATORS) {
-      myComment += `\n@${users.join(', @')}`;
+      let usersNoAlias = [];
+      users.forEach((u) => {
+        const cleaned = u.replace('~1','').replace('~2','');
+        if (usersNoAlias.indexOf(cleaned) === -1) usersNoAlias.push(cleaned);
+      });
+      myComment += `\n@${usersNoAlias.join(', @')}`;
     }
     console.log(`Adding comment: ${myComment}`);
     let replyBtn = document.getElementsByClassName('PostFull__reply')[0]
