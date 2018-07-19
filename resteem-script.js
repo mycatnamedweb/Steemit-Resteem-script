@@ -48,7 +48,11 @@ const currentLocation = window.location.href;
 let startupOk = true;
 if (currentLocation.indexOf('https://steemit.com') == -1 || currentLocation.indexOf(ACCOUNT_NAME) == -1) {
   startupOk = false;
-  alert(`Error!\n\n${ACCOUNT_NAME} you have to run this script on Steemit, on your newly created post..`);
+  if (ACCOUNT_NAME === 'YOUR_ACCOUNT_NAME_HERE') {
+    alert(`Error!\n\nBefore running this script you have to change the variable YOUR_ACCOUNT_NAME_HERE to your account name..`);
+  } else {
+    alert(`Error!\n\n${ACCOUNT_NAME} you have to run this script on Steemit, on your newly created post..`);
+  }
 }
 
 // leave check
@@ -79,7 +83,7 @@ const setNativeValue = (element, value) => {
 }
 
 const isMySeparator = (anchor) =>
-  anchor.offsetParent && anchor.offsetParent.id.indexOf(`@${ACCOUNT_NAME}`) !== -1
+  anchor && anchor.offsetParent && anchor.offsetParent.id.indexOf(`@${ACCOUNT_NAME}`) !== -1
   && anchor.href.indexOf(`@${ACCOUNT_NAME}`) !== -1
   && ( anchor.offsetParent.innerHTML.indexOf(RANDOM_COMMENT_AFTER_RESTEEM_1) !== -1
      || anchor.offsetParent.innerHTML.indexOf(RANDOM_COMMENT_AFTER_RESTEEM_2) !== -1
@@ -107,18 +111,27 @@ const getComment = () => {
   return comments[randomId];
 }
 
+const openPost = () => open(window.location.href,'_blank');
+
 const addDoNotCloseWarning = (wPost) => {
   try {
     if (!wPost) throw new Error(`Reference to the post window was missing in addDoNotCloseWarning.`);
     console.log('Adding donotclosewarning to other tab..');
     const divToAdd = wPost.document.createElement('div');
     divToAdd.id = 'donotclosewarning';
-    divToAdd.style.border = '2px solid red';
-    divToAdd.style.padding = '10px';
-    divToAdd.style['text-align'] = 'center';
+    const myStyle = divToAdd.style;
+    myStyle.border = '2px solid red';
+    myStyle.padding = '10px';
+    myStyle['text-align'] = 'center';
+    myStyle.width = '100%';
+    myStyle.position = 'fixed';
+    myStyle.top = '0';
+    myStyle.left = '0';
     divToAdd.innerHTML = `<h4 style="color:red">PLEASE DO NOT CLOSE THIS WINDOW.<br>Processing comments on it..</h3>`;
     wPost.document.body.insertBefore(divToAdd, wPost.document.body.firstChild);
-    wPost.document.getElementsByTagName('header')[0].style.position = 'relative';
+    const headerStyle = wPost.document.getElementsByTagName('header')[0].style;
+    headerStyle.position = 'relative';
+    headerStyle['background-color'] = 'transparent';
   } catch (err) {
     console.error(`Error in addDoNotCloseWarning: ${err}`);
   }
@@ -128,7 +141,7 @@ const addDoNotCloseWarning = (wPost) => {
 let wPost;
 if (startupOk) {
     buildUI();
-    setInterval(() => buildUI(), 10 * 60000); // 5 mins
+    setInterval(() => errorsToShowOnUI.length && buildUI(), 60000); // 1 min
     setTimeout(() => processUsersComments(), 5000); // let the UI build first
     setInterval(() => processUsersComments(), CHECK_NEW_COMMENTS_EVERY_N_MILLISECONS);
 }
@@ -214,7 +227,7 @@ async function readComments(k) {
     }
     users = Object.keys(toResteem);
     if (!users.length) {
-      console.log('---- END ----');
+      console.log(`${new Date().toString().split(' ').slice(1,5).join(' ')} :: ---- END ----`);
       if (wPost && wPost.close) {
         wPost.close();
         wPost = null;
@@ -472,4 +485,5 @@ async function buildUI () {
 // MANUAL COMMANDS:
 // processUsersComments()
 // clearErrors()
+// openPost()
 // buildUI()
