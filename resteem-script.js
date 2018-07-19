@@ -208,7 +208,7 @@ async function readComments(k) {
                 && firstTenToUpvAndFollow.indexOf(user) == -1) {
               firstTenToUpvAndFollow.push(user);
             }
-            if(Object.keys(toResteem).indexOf(user) == -1 && notAchildComment) {
+            if(notAchildComment) {
               let added = false;
               'a,'.repeat(MAX_LINKS_PER_USER - 1).split(',').forEach((_,id) => {
                 const userAlias = `${user}${id > 0 ? `~${id}` : ''}`; // user, user~1, user~2
@@ -345,9 +345,10 @@ async function execService(user, link) {
         errorsToShowOnUI.push(`${new Date()} -- No upvote button found on post. User ${user}, link ${link}. Skipping.`);
         return;
       }
-      if (upvoteBtn.firstChild.className.indexOf('chevron-up-circle') !== -1) {
+      document.getElementById('upvote_button');
+      if (upvoteBtn.title === 'Remove Vote') {
         console.log(`Post ${link} Was already upvoted..`);
-      } else {
+      } else if (upvoteBtn.title === 'Upvote') {
         upvoteBtn.click();
         await nap(3000);
       }
