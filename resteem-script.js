@@ -107,6 +107,34 @@ const getComment = () => {
   return comments[randomId];
 }
 
+const removeDoNotCloseWarning = (wPost) => {
+  try {
+    console.log('Removing donotclosewarning from other tab..');
+    wPost.document.getElementById('donotclosewarning').innerHTML = '<p style="color:green">This can now be closed if you want</p>';
+    wPost.document.getElementById('donotclosewarning').style.border = '1px solid green';
+    wPost.document.getElementById('donotclosewarning').style.padding = '10px';
+  } catch (err) {
+    console.error(`Error in removeDoNotCloseWarning: ${err}`);
+  }
+}
+
+const addDoNotCloseWarning = (wPost) => {
+  try {
+    if (!wPost) throw new Error(`Reference to the post window was missing in addDoNotCloseWarning.`);
+    console.log('Adding donotclosewarning to other tab..');
+    const divToAdd = wPost.document.createElement('div');
+    divToAdd.id = 'donotclosewarning';
+    divToAdd.style.border = '2px solid red';
+    divToAdd.style.padding = '10px';
+    divToAdd.style['text-align'] = 'center';
+    divToAdd.innerHTML = `<h4 style="color:red">PLEASE DO NOT CLOSE THIS WINDOW.<br>Processing comments on it..</h3>`;
+    wPost.document.body.insertBefore(divToAdd, wPost.document.body.firstChild);
+    wPost.document.getElementsByTagName('header')[0].style.position = 'relative';
+  } catch (err) {
+    console.error(`Error in addDoNotCloseWarning: ${err}`);
+  }
+}
+
 // ===============================  [[[[[[ ENTRY POINT ]]]]]]
 let wPost;
 if (startupOk) {
@@ -117,10 +145,14 @@ if (startupOk) {
 }
 
 async function processUsersComments() {
+  console.log('processUsersComments called..'); // TEMP // DEBUG
   if (!wPost || !wPost.close) {
     console.log(`Opening post ${window.location.href} in a new tab..`);
     wPost = open(window.location.href,'_blank');
-    wPost.addEventListener('load', () => setTimeout(() => processUsersComments(), 5000));
+    wPost.addEventListener('load', () => {
+      setTimeout(() => processUsersComments(), 5000);
+      addDoNotCloseWarning(wPost);
+    });
     return;
   }
   readComments(() => {
@@ -193,7 +225,13 @@ async function readComments(k) {
       console.log(`Links to resteem: ${Object.keys(toResteem).length} -->> ${JSON.stringify(toResteem)}`);
     }
     users = Object.keys(toResteem);
-    !users.length && console.log('---- END ----');
+    if (!users.length) {
+      console.log('---- END ----');
+      if (wPost && wPost.close) {
+        wPost.close();
+        wPost = null;
+      }
+    }
     k();
   } catch (err) {
     errorsToShowOnUI.push(`${new Date()} -- Error reading comments on post. Cause: ${err}`);
@@ -263,11 +301,13 @@ async function startResteems() {
               Failed resteems: ${JSON.stringify(failed)}.
               Warnings: ${warnings.length ? JSON.stringify(warnings) : 'none.'}
             `);
-            buildUI();
-            wPost && wPost.close && wPost.close();
-            setTimeout(() => wPost = open(window.location.href, '_blank'), 300000);
           } else if (warnings.length) {
             console.error(`There are warnings. \n${JSON.stringify(warnings)}`);
+          }
+          buildUI();
+          if (wPost && wPost.close) {
+            wPost.close();
+            wPost = null;
           }
         }, 10000); // wait 10 seconds more for pending errors..
       }
