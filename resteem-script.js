@@ -175,7 +175,7 @@ async function readComments(k) {
     commentIds = Object.keys(anchorsComments);
     lastAnchor = anchorsComments[commentIds[commentIds.length - 5]];
     failed = [], warnings = [];
-    if (!lastAnchor || isMySeparator(lastAnchor)) {
+    if (!lastAnchor || isMySeparator(lastAnchor)) {  TEMP <-::: @@@@@@@@@@@@@@@@@@@@@@@@
       console.log('>>>>>>>>> STOPPED. No comments to resteem..');
     } else {
       console.log('Getting links from comments');
@@ -316,6 +316,7 @@ async function startResteems() {
             wPost = null;
           }
         }, 10000); // wait 10 seconds more for pending errors..
+        localStorage.setItem('dailyScriptBot_result', resteemsCount);
       }
     }, OPEN_USER_LINK_TO_RESTEEM_EVERY_N_MILLISECONDS);
   }
