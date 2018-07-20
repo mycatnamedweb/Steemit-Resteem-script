@@ -175,7 +175,7 @@ async function readComments(k) {
     commentIds = Object.keys(anchorsComments);
     lastAnchor = anchorsComments[commentIds[commentIds.length - 5]];
     failed = [], warnings = [];
-    if (!lastAnchor || isMySeparator(lastAnchor)) {  TEMP <-::: @@@@@@@@@@@@@@@@@@@@@@@@
+    if (!lastAnchor || isMySeparator(lastAnchor)) {
       console.log('>>>>>>>>> STOPPED. No comments to resteem..');
     } else {
       console.log('Getting links from comments');
