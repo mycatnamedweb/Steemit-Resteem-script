@@ -43,7 +43,7 @@ const resteemedLinksOnThisPost = [];
 const upvotedStore = {};
 
 
-// =============================== startup check
+// =============================== startup
 const currentLocation = window.location.href;
 let startupOk = true;
 if (currentLocation.indexOf('https://steemit.com') == -1 || currentLocation.indexOf(ACCOUNT_NAME) == -1) {
@@ -54,8 +54,8 @@ if (currentLocation.indexOf('https://steemit.com') == -1 || currentLocation.inde
     alert(`Error!\n\n${ACCOUNT_NAME} you have to run this script on Steemit, on your newly created post..`);
   }
 }
+localStorage.setItem('dailyScriptBot_result', '0');
 
-// leave check
 window.onbeforeunload = function() {
   return "Dude, are you sure you want to leave? Think of the kittens!!";
 }
