@@ -37,7 +37,7 @@ let toResteem = {};
 let users = [];
 let firstTenToUpvAndFollow = [];
 let failed = [], warnings = [];
-let errorsToShowOnUI = [];
+document.errorsToShowOnUI = [];
 let resteemsCount = 0;
 const resteemedLinksOnThisPost = [];
 const upvotedStore = {};
@@ -142,7 +142,7 @@ const addDoNotCloseWarning = (wPost) => {
 let wPost;
 if (startupOk) {
     buildUI();
-    setInterval(() => errorsToShowOnUI.length && buildUI(), 60000); // 1 min
+    setInterval(() => document.errorsToShowOnUI.length && buildUI(), 60000); // 1 min
     setTimeout(() => processUsersComments(), 5000); // let the UI build first
     setInterval(() => processUsersComments(), CHECK_NEW_COMMENTS_EVERY_N_MILLISECONS);
 }
@@ -172,7 +172,7 @@ async function readComments(k) {
     const upvotedLinks = {};
 
     const commentsSection = wPost.document.getElementsByClassName('Post_comments__content')[0];
-    if (!commentsSection) errorsToShowOnUI.push(`${new Date()} -- Cannot run readComments on this page: "${wPost.window.location.href}".<br>No comments section found.`);
+    if (!commentsSection) document.errorsToShowOnUI.push(`${new Date()} -- Cannot run readComments on this page: "${wPost.window.location.href}".<br>No comments section found.`);
     anchorsComments = commentsSection.getElementsByTagName('a');
     const commentIds = Object.keys(anchorsComments);
     const lastAnchor = anchorsComments[commentIds[commentIds.length - 5]];
@@ -229,7 +229,7 @@ async function readComments(k) {
             })
           }
         } catch (err) {
-          errorsToShowOnUI.push(`${new Date()} -- Error processing link ${anchor.href}. Cause: ${err}`);
+          document.errorsToShowOnUI.push(`${new Date()} -- Error processing link ${anchor.href}. Cause: ${err}`);
         }
       }
     });
@@ -245,7 +245,7 @@ async function readComments(k) {
     }
     k();
   } catch (err) {
-    errorsToShowOnUI.push(`${new Date()} -- Error reading comments on post. Cause: ${err}`);
+    document.errorsToShowOnUI.push(`${new Date()} -- Error reading comments on post. Cause: ${err}`);
   }
 }
 
@@ -260,7 +260,7 @@ async function replyToPost(k) {
         confirmBtn.click();
         await nap(3000);
       } catch (err) {
-        errorsToShowOnUI.push(`${new Date()} -- Unable to delete old separator! Cause: ${err} \nContinuing..`);
+        document.errorsToShowOnUI.push(`${new Date()} -- Unable to delete old separator! Cause: ${err} \nContinuing..`);
       }
     }
     oldSeparatorDelBtn = null;
@@ -287,7 +287,7 @@ async function replyToPost(k) {
     postReplyBtn.click();
     await nap(1000);
   } catch (err) {
-    errorsToShowOnUI.push(`${new Date()} -- Error adding separator. Cause: ${err} \nContinuing..`);
+    document.errorsToShowOnUI.push(`${new Date()} -- Error adding separator. Cause: ${err} \nContinuing..`);
   }
   k();
 }
@@ -313,7 +313,7 @@ async function startResteems() {
               Warnings:
               ${JSON.stringify(warnings)}
             `);
-            errorsToShowOnUI.push(`${new Date()} -- RESTEEMS END.
+            document.errorsToShowOnUI.push(`${new Date()} -- RESTEEMS END.
               Failed resteems: ${JSON.stringify(failed)}.
               Warnings: ${warnings.length ? JSON.stringify(warnings) : 'none.'}
             `);
@@ -325,8 +325,8 @@ async function startResteems() {
             wPost.close();
             wPost = null;
           }
+          localStorage.setItem('dailyScriptBot_result', resteemsCount);
         }, 10000); // wait 10 seconds more for pending errors..
-        localStorage.setItem('dailyScriptBot_result', resteemsCount);
       }
     }, OPEN_USER_LINK_TO_RESTEEM_EVERY_N_MILLISECONDS);
   }
@@ -350,7 +350,7 @@ async function execService(user, link) {
       console.log(`SPECIAL TREAT for user ${user}.\n 1. Upvoting post`);
       const upvoteBtn = w.document.getElementById('upvote_button')
       if (!upvoteBtn) {
-        errorsToShowOnUI.push(`${new Date()} -- No upvote button found on post. User ${user}, link ${link}. Skipping.`);
+        document.errorsToShowOnUI.push(`${new Date()} -- No upvote button found on post. User ${user}, link ${link}. Skipping.`);
         return;
       }
       document.getElementById('upvote_button');
@@ -362,7 +362,7 @@ async function execService(user, link) {
       }
       const dropdownArrow = w.document.getElementsByClassName('Icon dropdown-arrow')[0];
       if (!dropdownArrow) {
-        errorsToShowOnUI.push(`${new Date()} -- No follow button found for user ${user} and link ${link}. Skipping.`);
+        document.errorsToShowOnUI.push(`${new Date()} -- No follow button found for user ${user} and link ${link}. Skipping.`);
         return;
       }
       dropdownArrow.click();
@@ -383,7 +383,7 @@ async function execService(user, link) {
     console.log('Resteeming post for user', user);
     const resteemBtn = w.document.querySelectorAll('[title=Resteem]')[0]
     if (!resteemBtn) {
-      errorsToShowOnUI.push(`${new Date()} -- Resteem button not found for user ${user} and link ${link}. Post may be expired.`);
+      document.errorsToShowOnUI.push(`${new Date()} -- Resteem button not found for user ${user} and link ${link}. Post may be expired.`);
       return;
     }
     resteemBtn.click();
@@ -402,7 +402,7 @@ async function execService(user, link) {
         resteemsCount++;
       }
     } else if (resteemOk && !confirmForm) {
-      errorsToShowOnUI.push(`${new Date()} -- Post Was already resteemed. User: ${user}`);
+      document.errorsToShowOnUI.push(`${new Date()} -- Post Was already resteemed. User: ${user}`);
     } else {
       const msg = `FAILED? Grey Resteem for ${user} -> ${link}`;
       console.log(msg);
@@ -412,15 +412,15 @@ async function execService(user, link) {
       }
     }
   } catch(err) {
-      errorsToShowOnUI.push(`${new Date()} -- Something went wrong processing post for user ${user}. Error: `, err);
+      document.errorsToShowOnUI.push(`${new Date()} -- Something went wrong processing post for user ${user}. Error: `, err);
   } finally {
     w.close();
   }
 }
 
 // ===============================  BASIC UI
-const clearErrors = () => {
-  errorsToShowOnUI = [];
+document.clean = () => {
+  document.errorsToShowOnUI = [];
   buildUI();
 };
 
@@ -439,12 +439,6 @@ async function buildUI () {
     console.log('Refreshing the UI ..');
   }
   const content = `
-    <script>
-      const clearErrors = () => { console.log(1);
-        errorsToShowOnUI = [];
-        ;
-      };
-    </script>
     <h3 style="margin:5px auto 20px">
       <b style="color:#8A2BE2">${ACCOUNT_NAME}</b>
     </h3>
@@ -453,23 +447,27 @@ async function buildUI () {
       Do not close or refresh this tab unless you want to stop the script
     </small>
     <h5 style="color:#fcfcfc">RESTEEM SERVICE STATUS:</h5>
-    <div style="float:right;padding:5px;border:thin solid green;margin-left:10px;color:#fcfcfc">
+    <div style="float:right;padding:5px;border:thin solid grey;margin-left:10px;color:#fcfcfc">
       Resteemed: ${resteemsCount}
     </div>
     <div style="max-height:600px;border:thin solid grey;overflow:auto;padding:15px">
-      ${errorsToShowOnUI.length ?
+      ${document.errorsToShowOnUI.length ?
         `<p id="errors" style="color:red">ERRORS</p>
          <ul style="color:#fcfcfc">
-           ${errorsToShowOnUI.map(err => `<li>${err}</li>`).reverse().join('')}
+           ${document.errorsToShowOnUI.map(err => `<li>${err}</li>`).reverse().join('')}
          </ul>
         `
         :
-        `<p id="ok" style="color:green">${users.length ? 'OK' : 'No comments yet..'}</p>`
+        `${users.length ? '<p style="color:green">OK</p>' : '<p style="color:#fcfcfc">No comments yet..</p>'}`
       }
     </div>
     ${
-      errorsToShowOnUI.length ?
-      `<p style="color:orange;margin-left:60px">To remove these errors execute in the console: &nbsp;<i>clearErrors()</i></p>` : ''
+      document.errorsToShowOnUI.length ?
+      `<p style="margin-left:60px">
+        <button onclick="document.clean()" style="color:orange;border:thin solid orange;padding:5px;margin-top:5px;cursor:pointer">
+          REMOVE ERRORS
+        </button>
+      </p>` : ''
     }
   `;
   const topDiv = document.getElementById('content');
