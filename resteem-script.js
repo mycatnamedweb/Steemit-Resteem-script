@@ -36,12 +36,12 @@ let anchorsComments = [];
 let toResteem = {};
 let users = [];
 let firstTenToUpvAndFollow = [];
-let commentIds = [];
-let lastAnchor = null;
 let failed = [], warnings = [];
 let errorsToShowOnUI = [];
 let resteemsCount = 0;
 const resteemedLinksOnThisPost = [];
+const upvotedStore = {};
+
 
 // =============================== startup check
 const currentLocation = window.location.href;
@@ -57,7 +57,7 @@ if (currentLocation.indexOf('https://steemit.com') == -1 || currentLocation.inde
 
 // leave check
 window.onbeforeunload = function() {
-  return "Dude, are you sure you want to leave? Think of the kittens!";
+  return "Dude, are you sure you want to leave? Think of the kittens!!";
 }
 
 
@@ -106,7 +106,8 @@ const comments = [
   RANDOM_COMMENT_AFTER_RESTEEM_2,
   RANDOM_COMMENT_AFTER_RESTEEM_3,
 ];
-const getComment = () => {
+const getComment = (oneUserOnly = false) => {
+  if (oneUserOnly) return RANDOM_COMMENT_AFTER_RESTEEM_2;
   const randomId = Math.floor(Math.random() * comments.length - 1) + 1;
   return comments[randomId];
 }
@@ -168,63 +169,72 @@ async function readComments(k) {
     oldSeparatorDelBtn = null;
     toResteem = {};
     users = [];
-    firstTenToUpvAndFollow = [];
+    const upvotedLinks = {};
+
     const commentsSection = wPost.document.getElementsByClassName('Post_comments__content')[0];
     if (!commentsSection) errorsToShowOnUI.push(`${new Date()} -- Cannot run readComments on this page: "${wPost.window.location.href}".<br>No comments section found.`);
     anchorsComments = commentsSection.getElementsByTagName('a');
-    commentIds = Object.keys(anchorsComments);
-    lastAnchor = anchorsComments[commentIds[commentIds.length - 5]];
+    const commentIds = Object.keys(anchorsComments);
+    const lastAnchor = anchorsComments[commentIds[commentIds.length - 5]];
     failed = [], warnings = [];
-    if (!lastAnchor || isMySeparator(lastAnchor)) {
-      console.log('>>>>>>>>> STOPPED. No comments to resteem..');
-    } else {
-      console.log('Getting links from comments');
-      let skipNext = false;
-      commentIds.forEach((idx) => {
-        const anchor = anchorsComments[idx];
-        if (isMySeparator(anchor)) {
-          console.log('Comments found so far were already resteemed, discarding them');
-          toResteem = {};
-          if (commentIds.length > +idx + 6) {
-            if (!skipNext) {
-              console.log(`Position of old separator saved.`);
-              const anchors = anchor.offsetParent.querySelectorAll('a');
-              const delBtn = anchors[anchors.length - 1];
-              oldSeparatorDelBtn = delBtn;
-            }
-            skipNext = skipNext ? false : true;
-          }
-          return;
-        }
-        const rightLink = anchor.href && anchor.href.split('/').length > 4 && notMine(anchor);
-        const parent = anchor.offsetParent && anchor.offsetParent.id;
-        if (anchor.href && anchor.href.indexOf('https://steemit.com/') !== -1
-            && parent && rightLink) {
-          try {
-            const parentArr = parent.split('/');
-            const notAchildComment = parentArr[1].indexOf(`/re-${ACCOUNT_NAME}`);
-            const user = parentArr[0].substr(2, parentArr[0].length -1);
-            if(firstTenToUpvAndFollow.length < HOW_MANY_FIRSTCOMERS
-                && firstTenToUpvAndFollow.indexOf(user) == -1) {
-              firstTenToUpvAndFollow.push(user);
-            }
-            if(notAchildComment) {
-              let added = false;
-              'a,'.repeat(MAX_LINKS_PER_USER - 1).split(',').forEach((_,id) => {
-                const userAlias = `${user}${id > 0 ? `~${id}` : ''}`; // user, user~1, user~2
-                if (!added && toResteem[userAlias] == undefined) {
-                  toResteem[userAlias] = anchor.href;
-                  added = true;
-                }
-              })
-            }
-          } catch (err) {
-            errorsToShowOnUI.push(`${new Date()} -- Error processing link ${anchor.href}. Cause: ${err}`);
-          }
-        }
-      });
-      console.log(`Links to resteem: ${Object.keys(toResteem).length} -->> ${JSON.stringify(toResteem)}`);
+
+    console.log('Getting links from comments');
+    if (!lastAnchor) {
+      console.log('>>>>> NO LINKS ON YOUR POST YET.');
+      k();
     }
+    let skipNext = false;
+    commentIds.forEach((idx) => {
+      const anchor = anchorsComments[idx];
+      if (isMySeparator(anchor)) {
+        console.log('Comments found so far were already resteemed, discarding them');
+        toResteem = {};
+        if (commentIds.length > +idx + 6) {
+          if (!skipNext) {
+            console.log(`Position of old separator saved.`);
+            const anchors = anchor.offsetParent.querySelectorAll('a');
+            const delBtn = anchors[anchors.length - 1];
+            oldSeparatorDelBtn = delBtn;
+          }
+          skipNext = skipNext ? false : true;
+        }
+        return;
+      }
+      const rightLink = anchor.href && anchor.href.split('/').length > 4 && notMine(anchor);
+      const parent = anchor.offsetParent && anchor.offsetParent.id;
+      if (anchor.href && anchor.href.indexOf('https://steemit.com/') !== -1
+          && parent && rightLink) {
+        try {
+          const parentArr = parent.split('/');
+          const notAchildComment = parentArr[1].indexOf(`/re-${ACCOUNT_NAME}`);
+          const user = parentArr[0].substr(2, parentArr[0].length -1);
+          if(firstTenToUpvAndFollow.length < HOW_MANY_FIRSTCOMERS
+              && firstTenToUpvAndFollow.indexOf(user) == -1) {
+            firstTenToUpvAndFollow.push(user);
+          }
+          if(notAchildComment) {
+            let added = false;
+            'a,'.repeat(MAX_LINKS_PER_USER - 1).split(',').forEach((_,id) => {
+              const userAlias = `${user}${id > 0 ? `~${id}` : ''}`; // user, user~1, user~2
+              if (!added && toResteem[userAlias] == undefined) {
+                toResteem[userAlias] = anchor.href;
+                if (anchor.offsetParent.innerText.indexOf(' vote') !== -1 &&
+                  anchor.offsetParent.innerText.indexOf('Reply') !== -1 &&
+                  upvotedStore[user] == undefined) {
+                    upvotedStore[user] = anchor.href;
+                    upvotedLinks[user] = anchor.href;
+                }
+                added = true;
+              }
+            })
+          }
+        } catch (err) {
+          errorsToShowOnUI.push(`${new Date()} -- Error processing link ${anchor.href}. Cause: ${err}`);
+        }
+      }
+    });
+    toResteem = { ...toResteem, ...upvotedLinks };
+    console.log(`Links to resteem: ${Object.keys(toResteem).length} -->> ${JSON.stringify(toResteem)}`);
     users = Object.keys(toResteem);
     if (!users.length) {
       console.log(`${new Date().toString().split(' ').slice(1,5).join(' ')} :: ---- END ----`);
@@ -254,7 +264,7 @@ async function replyToPost(k) {
       }
     }
     oldSeparatorDelBtn = null;
-    let myComment = getComment();
+    let myComment = getComment(users.length === 1);
     if (MENTION_USERS_IN_SEPARATORS) {
       let usersNoAlias = [];
       users.forEach((u) => {
@@ -329,9 +339,6 @@ async function execService(user, link) {
     w = open(link);
     await nap(4000);
     const userInFirstTen_index = firstTenToUpvAndFollow.indexOf(user);
-    if (userInFirstTen_index !== -1) {
-      firstTenToUpvAndFollow.splice(userInFirstTen_index, 1);
-    }
     const currentComment = wPost.document.getElementsByClassName('Post_comments__content')[0]
       .querySelectorAll(`[href='${link}']`)[0];
     const userMsg = currentComment && currentComment.parentElement
