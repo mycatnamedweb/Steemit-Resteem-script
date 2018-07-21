@@ -485,6 +485,10 @@ async function buildUI () {
     document.getElementsByClassName('columns medium-12 large-2 ')[0].innerHTML = '';
     document.getElementsByClassName('PostFull__responses')[0].innerHTML = '';
     document.getElementsByClassName('Header')[0].innerHTML = '';
+    const title = document.getElementsByClassName('entry-title')[0];
+    title.innerHTML = `<a href=${window.location.href} target="_blank">
+      <u>${title.innerText}</u> <small>{{ click to open in new tab }}</small>
+    </a>`;
   } else {
     injectedDiv.innerHTML = content;
     console.log('UI refreshed');
