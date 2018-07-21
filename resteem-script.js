@@ -233,7 +233,7 @@ async function readComments(k) {
         }
       }
     });
-    toResteem = { ...toResteem, ...upvotedLinks };
+    toResteem = Object.assign({}, toResteem, upvotedLinks);
     console.log(`Links to resteem: ${Object.keys(toResteem).length} -->> ${JSON.stringify(toResteem)}`);
     users = Object.keys(toResteem);
     if (!users.length) {
