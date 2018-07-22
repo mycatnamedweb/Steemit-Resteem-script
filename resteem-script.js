@@ -419,7 +419,7 @@ async function execService(user, link) {
 }
 
 // ===============================  BASIC UI
-const clearErrors = () => {
+const removeErrors = () => {
   errorsToShowOnUI = [];
   buildUI();
 };
@@ -494,8 +494,8 @@ async function buildUI () {
   }
 }
 
-// MANUAL COMMANDS:
-// processUsersComments()
-// clearErrors()
-// openPost()
-// buildUI()
+// -------- MANUAL COMMANDS: --------
+//       processUsersComments()
+//          removeErrors()
+//            openPost()
+//            buildUI()
