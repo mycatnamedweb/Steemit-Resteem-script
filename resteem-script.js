@@ -3,9 +3,10 @@
 
 const ACCOUNT_NAME = 'YOUR_ACCOUNT_NAME_HERE' // ( eg. gaottantacinque - no @ ) <<~~---===## MANDATORY
 
-const RANDOM_COMMENT_AFTER_RESTEEM_1 = `Done guys, thanks! :D`;
-const RANDOM_COMMENT_AFTER_RESTEEM_2 = `Done! Thanks for using my free resteem service! :)`;
-const RANDOM_COMMENT_AFTER_RESTEEM_3 = `All done until here guys`
+const COMMENT_AFTER_RESTEEMS_1 = `Done so far, thanks! :D`;
+const COMMENT_AFTER_RESTEEMS_2 = `Done! Thanks for using my free resteem service! :)`;
+const COMMENT_AFTER_RESTEEMS_3 = `All done until here`
+const EACH_BROWSER_DIFFERENT_COMMENT = true;
 const MENTION_USERS_IN_SEPARATORS = true;
 const DELETE_OLD_SEPARATOR_WHEN_NEW_COMMENTS = false;
 
@@ -85,9 +86,9 @@ const setNativeValue = (element, value) => {
 const isMySeparator = (anchor) =>
   anchor && anchor.offsetParent && anchor.offsetParent.id.indexOf(`@${ACCOUNT_NAME}`) !== -1
   && anchor.href.indexOf(`@${ACCOUNT_NAME}`) !== -1
-  && ( anchor.offsetParent.innerHTML.indexOf(RANDOM_COMMENT_AFTER_RESTEEM_1) !== -1
-     || anchor.offsetParent.innerHTML.indexOf(RANDOM_COMMENT_AFTER_RESTEEM_2) !== -1
-     || anchor.offsetParent.innerHTML.indexOf(RANDOM_COMMENT_AFTER_RESTEEM_3) !== -1 );
+  && ( anchor.offsetParent.innerHTML.indexOf(COMMENT_AFTER_RESTEEMS_1) !== -1
+     || anchor.offsetParent.innerHTML.indexOf(COMMENT_AFTER_RESTEEMS_2) !== -1
+     || anchor.offsetParent.innerHTML.indexOf(COMMENT_AFTER_RESTEEMS_3) !== -1 );
 
 const notMine = (anchor) =>
   anchor.href.indexOf(`@${ACCOUNT_NAME}`) == -1
@@ -101,15 +102,36 @@ const userSaysHeResteemed = (userMsg = '') => {
   ].filter(keyword => userMsg.toLowerCase().indexOf(keyword) !== -1).pop()
 }
 
+const extractUA = () => {
+  const ua = navigator.userAgent.split(' ').pop().split('/')[0].toLowerCase();
+  return ua === 'safari' ? 'chrome' : ua;
+}
+
+const getId = (brs = '') => {
+  switch (brs.charAt(0).toUpperCase()) {
+    case 'F':
+      return 0;
+    case 'O':
+      return 1;
+    case 'E': default:
+      return 2;
+  }
+}
+
 const comments = [
-  RANDOM_COMMENT_AFTER_RESTEEM_1,
-  RANDOM_COMMENT_AFTER_RESTEEM_2,
-  RANDOM_COMMENT_AFTER_RESTEEM_3,
+  COMMENT_AFTER_RESTEEMS_1,
+  COMMENT_AFTER_RESTEEMS_2,
+  COMMENT_AFTER_RESTEEMS_3,
 ];
 const getComment = (oneUserOnly = false) => {
-  if (oneUserOnly) return RANDOM_COMMENT_AFTER_RESTEEM_2;
-  const randomId = Math.floor(Math.random() * comments.length - 1) + 1;
-  return comments[randomId];
+  if (oneUserOnly) return COMMENT_AFTER_RESTEEMS_2;
+  if (EACH_BROWSER_DIFFERENT_COMMENT) {
+    const brsId = getId(extractUA());
+    return comments[brsId];
+  } else {
+    const randomId = Math.floor(Math.random() * comments.length - 1) + 1;
+    return comments[randomId];
+  }
 }
 
 const openPost = () => open(window.location.href,'_blank');
@@ -493,6 +515,8 @@ async function buildUI () {
     console.log('UI refreshed');
   }
 }
+
+// https://github.com/mycatnamedweb/Steemit-Resteem-script/blob/master/resteem-script.js
 
 // -------- MANUAL COMMANDS: --------
 //       processUsersComments()
