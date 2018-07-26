@@ -359,7 +359,7 @@ async function execService(user, link) {
   let w;
   try {
     w = open(link);
-    await nap(4000);
+    await nap(5000);
     const userInFirstTen_index = firstTenToUpvAndFollow.indexOf(user);
     const currentComment = wPost.document.getElementsByClassName('Post_comments__content')[0]
       .querySelectorAll(`[href='${link}']`)[0];
@@ -375,12 +375,16 @@ async function execService(user, link) {
         errorsToShowOnUI.push(`${new Date()} -- No upvote button found on post. User ${user}, link ${link}. Skipping.`);
         return;
       }
-      document.getElementById('upvote_button');
       if (upvoteBtn.title === 'Remove Vote') {
         console.log(`Post ${link} Was already upvoted..`);
       } else if (upvoteBtn.title === 'Upvote') {
         upvoteBtn.click();
         await nap(3000);
+        const weightBtn = w.document.querySelectorAll('a[class="confirm_weight"]')[0];
+        if (weightBtn) {
+          weightBtn.click();
+          await nap(3000);
+        }
       }
       const dropdownArrow = w.document.getElementsByClassName('Icon dropdown-arrow')[0];
       if (!dropdownArrow) {
