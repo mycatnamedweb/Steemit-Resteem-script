@@ -38,7 +38,7 @@ let toResteem = {};
 let users = [];
 let firstTenToUpvAndFollow = [];
 let failed = [], warnings = [];
-errorsToShowOnUI = [];
+let errorsToShowOnUI = [];
 let resteemsCount = 0;
 const resteemedLinksOnThisPost = [];
 const upvotedStore = {};
@@ -370,14 +370,17 @@ async function execService(user, link) {
     if ( (SPECIAL_TREAT_IF_USER_RESTEEMS && userSaysHeResteemed(userMsg)) ||
          (SPECIAL_TREAT_TO_FIRSTCOMERS && userInFirstTen_index !== -1 ) ) {
       console.log(`SPECIAL TREAT for user ${user}.\n 1. Upvoting post`);
-      const upvoteBtn = w.document.getElementById('upvote_button')
+      const upvBtnType1 = w.document.getElementById('upvote_button');
+      const upvBtnBlock = w.document.querySelectorAll('span[class="Voting__button Voting__button-up"]')[0];
+      const upvBtnType2 = upvBtnBlock && upvBtnBlock.firstChild.firstChild;
+      const upvoteBtn = upvBtnType1 || upvBtnType2;
       if (!upvoteBtn) {
         errorsToShowOnUI.push(`${new Date()} -- No upvote button found on post. User ${user}, link ${link}. Skipping.`);
         return;
       }
-      if (upvoteBtn.title === 'Remove Vote') {
-        console.log(`Post ${link} Was already upvoted..`);
-      } else if (upvoteBtn.title === 'Upvote') {
+      // if (upvoteBtn.title === 'Remove Vote') {
+      //   console.log(`Post ${link} Was already upvoted..`);
+      // } else if (upvoteBtn.title === 'Upvote') {
         upvoteBtn.click();
         await nap(3000);
         const weightBtn = w.document.querySelectorAll('a[class="confirm_weight"]')[0];
@@ -385,7 +388,7 @@ async function execService(user, link) {
           weightBtn.click();
           await nap(3000);
         }
-      }
+      // }
       const dropdownArrow = w.document.getElementsByClassName('Icon dropdown-arrow')[0];
       if (!dropdownArrow) {
         errorsToShowOnUI.push(`${new Date()} -- No follow button found for user ${user} and link ${link}. Skipping.`);
