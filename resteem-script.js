@@ -410,7 +410,7 @@ async function execService(user, link) {
     }
 
     console.log('Resteeming post for user', user);
-    const resteemBtn = w.document.querySelectorAll('[title=Resteem]')[0]
+    const resteemBtn = w.document.querySelectorAll('a[title=Resteem]')[0]
     if (!resteemBtn) {
       errorsToShowOnUI.push(`${new Date()} -- Resteem button not found for user ${user} and link ${link}. Post may be expired.`);
       return;
