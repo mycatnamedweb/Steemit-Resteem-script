@@ -160,6 +160,8 @@ const addDoNotCloseWarning = (wPost) => {
   }
 }
 
+const addUpvotedUserManual = (user, link) => upvotedStore[user] = link;
+
 // ===============================  [[[[[[ ENTRY POINT ]]]]]]
 let wPost;
 if (startupOk) {
@@ -530,3 +532,4 @@ async function buildUI () {
 //          removeErrors()
 //            openPost()
 //            buildUI()
+// PS. addUpvotedUserManual('user', 'https..')
