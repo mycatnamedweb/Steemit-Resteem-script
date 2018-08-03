@@ -298,13 +298,9 @@ async function replyToPost(k) {
       let usersNoAlias = [];
       users.forEach((u) => {
         const cleaned = u.replace('~1','').replace('~2','');
-        if (usersNoAlias.indexOf(cleaned) === -1) usersNoAlias.push(cleaned);
+        if (usersNoAlias.indexOf(cleaned) === -1 && blacklist.indexOf(cleaned) === -1)
+          usersNoAlias.push(cleaned);
       });
-      blacklist.forEach(user => {
-        const posBlack = blacklist.indexOf(user);
-        const posUser = usersNoAlias.indexOf(user);
-        posBlack + 1 && usersNoAlias.splice(posUser, 1);
-      })
       myComment += `\n@${usersNoAlias.join(', @')}`;
     }
     console.log(`Adding comment: ${myComment}`);
