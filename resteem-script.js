@@ -28,7 +28,6 @@ const OPEN_USER_LINK_TO_RESTEEM_EVERY_N_MILLISECONDS = 13000; // 13 seconds
 // =========================================================================
 
 
-
 /* VERSION 1.01 */
 
 // =============================== VARS
@@ -42,6 +41,8 @@ let errorsToShowOnUI = [];
 let resteemsCount = 0;
 const resteemedLinksOnThisPost = [];
 const upvotedStore = {};
+const blacklist = JSON.parse(localStorage.getItem('blacklist-rs'))
+  || ['resteem.bot'];
 
 
 // =============================== startup
@@ -58,6 +59,7 @@ if (currentLocation.indexOf('https://steemit.com') == -1 || currentLocation.inde
 localStorage.setItem('dailyScriptBot_result', '0');
 
 window.onbeforeunload = function() {
+  localStorage.setItem('blacklist-rs', blacklist);
   return "Dude, are you sure you want to leave? Think of the kittens!!";
 }
 
@@ -82,6 +84,8 @@ const setNativeValue = (element, value) => {
     valueSetter.call(element, value);
   }
 }
+
+const addToBlackList = (user) => blacklist.push(user);
 
 const isMySeparator = (anchor) =>
   anchor && anchor.offsetParent && anchor.offsetParent.id.indexOf(`@${ACCOUNT_NAME}`) !== -1
@@ -295,6 +299,11 @@ async function replyToPost(k) {
         const cleaned = u.replace('~1','').replace('~2','');
         if (usersNoAlias.indexOf(cleaned) === -1) usersNoAlias.push(cleaned);
       });
+      blacklist.forEach(user => {
+        const posBlack = blacklist.indexOf(user);
+        const posUser = usersNoAlias.indexOf(user);
+        posBlack + 1 && usersNoAlias.splice(posUser, 1);
+      })
       myComment += `\n@${usersNoAlias.join(', @')}`;
     }
     console.log(`Adding comment: ${myComment}`);
@@ -360,6 +369,10 @@ async function execService(user, link) {
   console.log(`Processing link ${link} for user ${user}`);
   let w;
   try {
+    if (blacklist.indexOf(user) !== -1) {
+      console.log(`Service for blacklisted user rejected.`);
+      return;
+    }
     w = open(link);
     await nap(5000);
     const userInFirstTen_index = firstTenToUpvAndFollow.indexOf(user);
