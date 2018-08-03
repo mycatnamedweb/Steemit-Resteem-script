@@ -43,7 +43,7 @@ const resteemedLinksOnThisPost = [];
 const upvotedStore = {};
 
 const storedBl = localStorage.getItem('blacklist-rs');
-const blacklist = storedBl ? storedBl.split(',') || ['resteem.bot'];
+const blacklist = storedBl ? storedBl.split(',') : ['resteem.bot'];
 
 
 // =============================== startup
