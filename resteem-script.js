@@ -301,7 +301,7 @@ async function replyToPost(k) {
         if (usersNoAlias.indexOf(cleaned) === -1 && blacklist.indexOf(cleaned) === -1)
           usersNoAlias.push(cleaned);
       });
-      myComment += `\n@${usersNoAlias.join(', @')}`;
+      if (usersNoAlias.length) myComment += `\n@${usersNoAlias.join(', @')}`;
     }
     console.log(`Adding comment: ${myComment}`);
     let replyBtn = document.getElementsByClassName('PostFull__reply')[0]
@@ -504,9 +504,9 @@ async function buildUI () {
       }
     </div>
     ${
-      errorsToShowOnUI.length ?
+      errorsToShowOnUI.length ? // onclick="document.clean()" -> CSP issue
       `<p style="margin-left:60px">
-        <button onclick="document.clean()" style="color:orange;border:thin solid orange;padding:5px;margin-top:5px;cursor:pointer">
+        <button style="color:orange;border:thin solid orange;padding:5px;margin-top:5px;cursor:pointer">
           REMOVE ERRORS
         </button> <small style="color:orange"> -> works only in Edge. For other browsers execute in console: &nbsp; <i>removeErrors()</i></small>
       </p>` : ''
