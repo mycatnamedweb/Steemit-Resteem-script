@@ -41,8 +41,9 @@ let errorsToShowOnUI = [];
 let resteemsCount = 0;
 const resteemedLinksOnThisPost = [];
 const upvotedStore = {};
-const blacklist = JSON.parse(localStorage.getItem('blacklist-rs'))
-  || ['resteem.bot'];
+
+const storedBl = localStorage.getItem('blacklist-rs');
+const blacklist = storedBl ? storedBl.split(',') || ['resteem.bot'];
 
 
 // =============================== startup
