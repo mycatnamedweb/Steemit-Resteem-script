@@ -179,7 +179,7 @@ if (startupOk) {
 async function processUsersComments() {
   if (!wPost || !wPost.close) {
     console.log(`Opening post ${window.location.href} in a new tab..`);
-    wPost = open(window.location.href,'_blank');
+    wPost = open(`${window.location.href}?sort=new#comments`,'_blank');
     wPost.addEventListener('load', () => {
       setTimeout(() => processUsersComments(), 5000);
       addDoNotCloseWarning(wPost);
@@ -213,22 +213,26 @@ async function readComments(k) {
       k();
     }
     let skipNext = false;
+    let noMoreBcFoundSeparator = false;
     commentIds.forEach((idx) => {
       const anchor = anchorsComments[idx];
       if (isMySeparator(anchor)) {
         console.log('Comments found so far were already resteemed, discarding them');
-        toResteem = {};
+        // toResteem = {};
         if (commentIds.length > +idx + 6) {
           if (!skipNext) {
             console.log(`Position of old separator saved.`);
             const anchors = anchor.offsetParent.querySelectorAll('a');
             const delBtn = anchors[anchors.length - 1];
             oldSeparatorDelBtn = delBtn;
+            noMoreBcFoundSeparator = true;
           }
           skipNext = skipNext ? false : true;
         }
         return;
       }
+      if (noMoreBcFoundSeparator) return;
+
       const rightLink = anchor.href && anchor.href.split('/').length > 4 && notMine(anchor);
       const parent = anchor.offsetParent && anchor.offsetParent.id;
       if (anchor.href && anchor.href.indexOf('https://steemit.com/') !== -1
