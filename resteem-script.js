@@ -3,6 +3,7 @@
 
 const ACCOUNT_NAME = 'YOUR_ACCOUNT_NAME_HERE' // ( eg. gaottantacinque - no @ ) <<~~---===## MANDATORY
 
+const NO_REPLY_TO_COMMENTERS = false;
 const COMMENT_AFTER_RESTEEMS_1 = `Done so far, thanks! :D`;
 const COMMENT_AFTER_RESTEEMS_2 = `Done! Thanks for using my free resteem service! :)`;
 const COMMENT_AFTER_RESTEEMS_3 = `All done until here`
@@ -283,6 +284,10 @@ async function readComments(k) {
 }
 
 async function replyToPost(k) {
+  if (NO_REPLY_TO_COMMENTERS) {
+    k();
+    return;
+  }
   try {
     if (oldSeparatorDelBtn && DELETE_OLD_SEPARATOR_WHEN_NEW_COMMENTS) {
       try {
@@ -370,7 +375,7 @@ async function execService(user, link) {
   console.log(`Processing link ${link} for user ${user}`);
   let w;
   try {
-    if (blacklist.indexOf(user) !== -1) {
+    if (blacklist.indexOf(user.split('~')[0]) !== -1) {
       console.log(`Service for blacklisted user rejected.`);
       return;
     }
