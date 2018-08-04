@@ -1,7 +1,7 @@
 // =========================================================================
 // CHANGE THESE vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-const ACCOUNT_NAME = 'YOUR_ACCOUNT_NAME_HERE' // ( eg. gaottantacinque - no @ ) <<~~---===## MANDATORY
+let ACCOUNT_NAME = 'YOUR_ACCOUNT_NAME_HERE' // ( eg. gaottantacinque - no @ ) <<~~---===## MANDATORY
 
 const NO_REPLY_TO_COMMENTERS = false;
 const COMMENT_AFTER_RESTEEMS_1 = `Done so far, thanks! :D`;
@@ -11,9 +11,9 @@ const EACH_BROWSER_DIFFERENT_COMMENT = true;
 const MENTION_USERS_IN_SEPARATORS = true;
 const DELETE_OLD_SEPARATOR_WHEN_NEW_COMMENTS = false;
 
-const MAX_LINKS_PER_USER = 3;
+let MAX_LINKS_PER_USER = 3;
 
-const SPECIAL_TREAT_TO_FIRSTCOMERS = true;
+let SPECIAL_TREAT_TO_FIRSTCOMERS = true;
 const HOW_MANY_FIRSTCOMERS = 5;
 
 const SPECIAL_TREAT_IF_USER_RESTEEMS = true;
@@ -22,8 +22,8 @@ const KEYWORD_IN_COMMENT_TO_GET_UPVOTE_AND_FOLLOW_2 = 're-steemed';
 const KEYWORD_IN_COMMENT_TO_GET_UPVOTE_AND_FOLLOW_3 = 'reblogged';
 const KEYWORD_IN_COMMENT_TO_GET_UPVOTE_AND_FOLLOW_4 = '~#_ADD (lowercase) KEYWORD HERE IF NEEDED_#~';
 
-const CHECK_NEW_COMMENTS_EVERY_N_MILLISECONS = 1800000;  // 30 mins
-const OPEN_USER_LINK_TO_RESTEEM_EVERY_N_MILLISECONDS = 13000; // 13 seconds
+const CHECK_NEW_COMMENTS_EVERY_N_MILLISECONS = 30 * 60 * 1000;  // 30 mins
+const OPEN_USER_LINK_TO_RESTEEM_EVERY_N_MILLISECONDS = 13 * 1000; // 13 seconds
 
 // CHANGE THESE ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 // =========================================================================
@@ -45,25 +45,6 @@ const upvotedStore = {};
 
 const storedBl = localStorage.getItem('blacklist-rs');
 const blacklist = storedBl ? storedBl.split(',') : ['resteem.bot'];
-
-
-// =============================== startup
-const currentLocation = window.location.href;
-let startupOk = true;
-if (currentLocation.indexOf('https://steemit.com') == -1 || currentLocation.indexOf(ACCOUNT_NAME) == -1) {
-  startupOk = false;
-  if (ACCOUNT_NAME === 'YOUR_ACCOUNT_NAME_HERE') {
-    alert(`Error!\n\nBefore running this script you have to change the variable YOUR_ACCOUNT_NAME_HERE to your account name..`);
-  } else {
-    alert(`Error!\n\n${ACCOUNT_NAME} you have to run this script on Steemit, on your newly created post..`);
-  }
-}
-localStorage.setItem('dailyScriptBot_result', '0');
-
-window.onbeforeunload = function() {
-  localStorage.setItem('blacklist-rs', blacklist);
-  return "Dude, are you sure you want to leave? Think of the kittens!!";
-}
 
 
 // ================================ UTILITIES
@@ -170,12 +151,6 @@ const addUpvotedUserManual = (user, link) => upvotedStore[user] = link;
 
 // ===============================  [[[[[[ ENTRY POINT ]]]]]]
 let wPost;
-if (startupOk) {
-    buildUI();
-    setInterval(() => errorsToShowOnUI.length && buildUI(), 60000); // 1 min
-    setTimeout(() => processUsersComments(), 5000); // let the UI build first
-    setInterval(() => processUsersComments(), CHECK_NEW_COMMENTS_EVERY_N_MILLISECONS);
-}
 
 async function processUsersComments() {
   if (!wPost || !wPost.close) {
@@ -202,7 +177,12 @@ async function readComments(k) {
     const upvotedLinks = {};
 
     const commentsSection = wPost.document.getElementsByClassName('Post_comments__content')[0];
-    if (!commentsSection) errorsToShowOnUI.push(`${new Date()} -- Cannot run readComments on this page: "${wPost.window.location.href}".<br>No comments section found.`);
+    if (!commentsSection) {
+      errorsToShowOnUI.push(`${new Date()} -- Cannot run readComments on this page: "${wPost.window.location.href}".<br>No comments section found.`);
+      wPost.close();
+      setTimeout(() => processUsersComments(), 30000);
+      return console.error(`Unable to read comments, page did not load correctly. Will retry in 30 seconds.`);
+    }
     anchorsComments = commentsSection.getElementsByTagName('a');
     const commentIds = Object.keys(anchorsComments);
     const lastAnchor = anchorsComments[commentIds[commentIds.length - 5]];
@@ -544,11 +524,48 @@ async function buildUI () {
   }
 }
 
-// https://github.com/mycatnamedweb/Steemit-Resteem-script/blob/master/resteem-script.js
 
-// -------- MANUAL COMMANDS: --------
-//       processUsersComments()
-//          removeErrors()
-//            openPost()
-//            buildUI()
-// PS. addUpvotedUserManual('user', 'https..')
+// =============================== startup
+
+window.onbeforeunload = function() {
+  localStorage.setItem('blacklist-rs', blacklist);
+  return "Dude, are you sure you want to leave? Think of the kittens!!";
+}
+
+const start = () => {
+  const currentLocation = window.location.href;
+  let startupOk = true;
+  if (currentLocation.indexOf('https://steemit.com') == -1 || currentLocation.indexOf(ACCOUNT_NAME) == -1) {
+    startupOk = false;
+    if (ACCOUNT_NAME === 'YOUR_ACCOUNT_NAME_HERE') {
+      alert(`Error!\n\nBefore running this script you have to change the variable YOUR_ACCOUNT_NAME_HERE to your account name..`);
+    } else {
+      alert(`Error!\n\n${ACCOUNT_NAME} you have to run this script on Steemit, on your newly created post..`);
+    }
+  }
+  if (startupOk) {
+    localStorage.setItem('dailyScriptBot_result', '0');
+    buildUI();
+    setInterval(() => errorsToShowOnUI.length && buildUI(), 60000); // 1 min
+    setTimeout(() => processUsersComments(), 5000); // let the UI build first
+    setInterval(() => processUsersComments(), CHECK_NEW_COMMENTS_EVERY_N_MILLISECONS);
+  } else {
+    console.error(`Startup was not ok. Setup correctly and reexecute start()`)
+  }
+}
+
+document['ation'] = `
+        // https://github.com/mycatnamedweb/Steemit-Resteem-script/blob/master/resteem-script.js
+
+        // -------- MANUAL COMMANDS: --------
+        //       processUsersComments()
+        //          removeErrors()
+        //            openPost()
+        //            buildUI()
+        // PS. addUpvotedUserManual('user', 'https..')
+
+  // SPECIAL_TREAT_TO_FIRSTCOMERS = false;
+  // MAX_LINKS_PER_USER = 1;
+  ACCOUNT_NAME = 'YOUR_ACCOUNT_NAME_HERE'
+  start();
+`;
