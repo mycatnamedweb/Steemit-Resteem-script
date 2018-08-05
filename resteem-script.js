@@ -160,13 +160,13 @@ async function processUsersComments() {
       setTimeout(() => processUsersComments(), 5000);
       addDoNotCloseWarning(wPost);
     });
-    // setTimeout(() => {
-    //   if (!wPost || !wPost.document.getElementsByClassName('Post_comments__content')[0]) {
-    //     console.error(`After 15 s the post is still not there. Closing window..`);
-    //     wPost && !wPost.closed && wPost.close();
-    //     wPost = null;
-    //   }
-    // }, 15 * 1000);
+    setTimeout(() => {
+      if (!wPost || !wPost.document.getElementsByClassName('Post_comments__content')[0]) {
+        console.error(`After 15 s the post is still not there. Closing window..`);
+        wPost && !wPost.closed && wPost.close();
+        wPost = null;
+      }
+    }, 15 * 1000);
     return;
   }
   readComments(() => {
