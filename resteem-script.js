@@ -3,7 +3,7 @@
 
 let ACCOUNT_NAME = 'YOUR_ACCOUNT_NAME_HERE' // ( eg. gaottantacinque - no @ ) <<~~---===## MANDATORY
 
-const NO_REPLY_TO_COMMENTERS = false;
+let NO_REPLY_TO_COMMENTERS = false;
 const COMMENT_AFTER_RESTEEMS_1 = `Done so far, thanks! :D`;
 const COMMENT_AFTER_RESTEEMS_2 = `Done! Thanks for using my free resteem service! :)`;
 const COMMENT_AFTER_RESTEEMS_3 = `All done until here`
@@ -153,13 +153,20 @@ const addUpvotedUserManual = (user, link) => upvotedStore[user] = link;
 let wPost;
 
 async function processUsersComments() {
-  if (!wPost || !wPost.close) {
+  if (!wPost || !wPost.close || wPost.closed) {
     console.log(`Opening post ${window.location.href} in a new tab..`);
     wPost = open(`${window.location.href}?sort=new#comments`,'_blank');
     wPost.addEventListener('load', () => {
       setTimeout(() => processUsersComments(), 5000);
       addDoNotCloseWarning(wPost);
     });
+    // setTimeout(() => {
+    //   if (!wPost || !wPost.document.getElementsByClassName('Post_comments__content')[0]) {
+    //     console.error(`After 15 s the post is still not there. Closing window..`);
+    //     wPost && !wPost.closed && wPost.close();
+    //     wPost = null;
+    //   }
+    // }, 15 * 1000);
     return;
   }
   readComments(() => {
@@ -533,25 +540,21 @@ window.onbeforeunload = function() {
 }
 
 const start = () => {
+  if (ACCOUNT_NAME === 'YOUR_ACCOUNT_NAME_HERE') {
+    alert(`Error!\n\nBefore running this script you have to change the variable YOUR_ACCOUNT_NAME_HERE to your account name..`);
+    return;
+  }
   const currentLocation = window.location.href;
-  let startupOk = true;
-  if (currentLocation.indexOf('https://steemit.com') == -1 || currentLocation.indexOf(ACCOUNT_NAME) == -1) {
-    startupOk = false;
-    if (ACCOUNT_NAME === 'YOUR_ACCOUNT_NAME_HERE') {
-      alert(`Error!\n\nBefore running this script you have to change the variable YOUR_ACCOUNT_NAME_HERE to your account name..`);
-    } else {
-      alert(`Error!\n\n${ACCOUNT_NAME} you have to run this script on Steemit, on your newly created post..`);
-    }
+  if (currentLocation.indexOf('https://steemit.com') == -1
+    || currentLocation.indexOf(ACCOUNT_NAME) == -1) {
+    alert(`Error!\n\n${ACCOUNT_NAME} you have to run this script on Steemit, on your newly created post..`);
+    return;
   }
-  if (startupOk) {
-    localStorage.setItem('dailyScriptBot_result', '0');
-    buildUI();
-    setInterval(() => errorsToShowOnUI.length && buildUI(), 60000); // 1 min
-    setTimeout(() => processUsersComments(), 5000); // let the UI build first
-    setInterval(() => processUsersComments(), CHECK_NEW_COMMENTS_EVERY_N_MILLISECONS);
-  } else {
-    console.error(`Startup was not ok. Setup correctly and reexecute start()`)
-  }
+  localStorage.setItem('dailyScriptBot_result', '0');
+  buildUI();
+  setInterval(() => errorsToShowOnUI.length && buildUI(), 60000); // 1 min
+  setTimeout(() => processUsersComments(), 5000); // let the UI build first
+  setInterval(() => processUsersComments(), CHECK_NEW_COMMENTS_EVERY_N_MILLISECONS);
 }
 
 document['ation'] = `
@@ -566,6 +569,7 @@ document['ation'] = `
 
   // SPECIAL_TREAT_TO_FIRSTCOMERS = false;
   // MAX_LINKS_PER_USER = 1;
+  // NO_REPLY_TO_COMMENTERS = true;
   ACCOUNT_NAME = 'YOUR_ACCOUNT_NAME_HERE'
   start();
 `;
