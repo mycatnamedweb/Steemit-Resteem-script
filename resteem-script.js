@@ -1,7 +1,7 @@
 // =========================================================================
 // CHANGE THESE vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-var accountName = 'YOUR_ACCOUNT_NAME_HERE' // ( eg. gaottantacinque - no @ ) <<~~---===## MANDATORY
+let ACCOUNT_NAME = 'YOUR_ACCOUNT_NAME_HERE' // ( eg. gaottantacinque - no @ ) <<~~---===## MANDATORY
 
 let NO_REPLY_TO_COMMENTERS = false;
 const COMMENT_AFTER_RESTEEMS_1 = `Done so far, thanks! :D`;
@@ -41,7 +41,7 @@ let failed = [], warnings = [];
 let errorsToShowOnUI = [];
 let resteemsCount = 0;
 const resteemedLinksOnThisPost = [];
-const upvotedStore = {};
+// const upvotedStore = {};
 
 const storedBl = localStorage.getItem('blacklist-rs');
 const blacklist = storedBl ? storedBl.split(',') : ['resteem.bot'];
@@ -71,14 +71,14 @@ const setNativeValue = (element, value) => {
 const addToBlackList = (user) => blacklist.push(user);
 
 const isMySeparator = (anchor) =>
-  anchor && anchor.offsetParent && anchor.offsetParent.id.indexOf(`@${accountName}`) !== -1
-  && anchor.href.indexOf(`@${accountName}`) !== -1
+  anchor && anchor.offsetParent && anchor.offsetParent.id.indexOf(`@${ACCOUNT_NAME}`) !== -1
+  && anchor.href.indexOf(`@${ACCOUNT_NAME}`) !== -1
   && ( anchor.offsetParent.innerHTML.indexOf(COMMENT_AFTER_RESTEEMS_1) !== -1
      || anchor.offsetParent.innerHTML.indexOf(COMMENT_AFTER_RESTEEMS_2) !== -1
      || anchor.offsetParent.innerHTML.indexOf(COMMENT_AFTER_RESTEEMS_3) !== -1 );
 
 const notMine = (anchor) =>
-  anchor.href.indexOf(`@${accountName}`) == -1
+  anchor.href.indexOf(`@${ACCOUNT_NAME}`) == -1
 
 const userSaysHeResteemed = (userMsg = '') => {
   return !![
@@ -147,7 +147,7 @@ const addDoNotCloseWarning = (wPost) => {
   }
 }
 
-const addUpvotedUserManual = (user, link) => upvotedStore[user] = link;
+// const addUpvotedUserManual = (user, link) => upvotedStore[user] = link;
 
 // ===============================  [[[[[[ ENTRY POINT ]]]]]]
 let wPost;
@@ -181,7 +181,7 @@ async function readComments(k) {
     oldSeparatorDelBtn = null;
     toResteem = {};
     users = [];
-    const upvotedLinks = {};
+    // const upvotedLinks = {};
 
     const commentsSection = wPost.document.getElementsByClassName('Post_comments__content')[0];
     if (!commentsSection) {
@@ -227,7 +227,7 @@ async function readComments(k) {
           && parent && rightLink) {
         try {
           const parentArr = parent.split('/');
-          const notAchildComment = parentArr[1].indexOf(`/re-${accountName}`);
+          const notAchildComment = parentArr[1].indexOf(`/re-${ACCOUNT_NAME}`);
           const user = parentArr[0].substr(2, parentArr[0].length -1);
           if(firstTenToUpvAndFollow.length < HOW_MANY_FIRSTCOMERS
               && firstTenToUpvAndFollow.indexOf(user) == -1) {
@@ -239,12 +239,12 @@ async function readComments(k) {
               const userAlias = `${user}${id > 0 ? `~${id}` : ''}`; // user, user~1, user~2
               if (!added && toResteem[userAlias] == undefined) {
                 toResteem[userAlias] = anchor.href;
-                if (anchor.offsetParent.innerText.indexOf(' vote') !== -1 &&
-                  anchor.offsetParent.innerText.indexOf('Reply') !== -1 &&
-                  upvotedStore[user] == undefined) {
-                    upvotedStore[user] = anchor.href;
-                    upvotedLinks[user] = anchor.href;
-                }
+                // if (anchor.offsetParent.innerText.indexOf(' vote') !== -1 &&
+                //   anchor.offsetParent.innerText.indexOf('Reply') !== -1 &&
+                //   upvotedStore[user] == undefined) {
+                //     upvotedStore[user] = anchor.href;
+                //     upvotedLinks[user] = anchor.href;
+                // }
                 added = true;
               }
             })
@@ -254,7 +254,7 @@ async function readComments(k) {
         }
       }
     });
-    toResteem = Object.assign({}, toResteem, upvotedLinks);
+    // toResteem = Object.assign({}, toResteem, upvotedLinks);
     console.log(`Links to resteem: ${Object.keys(toResteem).length} -->> ${JSON.stringify(toResteem)}`);
     users = Object.keys(toResteem);
     if (!users.length) {
@@ -478,7 +478,7 @@ async function buildUI () {
   }
   const content = `
     <h3 style="margin:5px auto 20px">
-      <b style="color:#8A2BE2">${accountName}</b>
+      <b style="color:#8A2BE2">${ACCOUNT_NAME}</b>
     </h3>
     <div>
     <small style="color:yellow;float:right;margin-right:10px;margin-top:-50px">
@@ -539,15 +539,15 @@ window.onbeforeunload = function() {
   return "Dude, are you sure you want to leave? Think of the kittens!!";
 }
 
-const start = (accountName) => {
-  if (accountName === 'YOUR_ACCOUNT_NAME_HERE') {
-    alert(`Error!\n\nBefore running this script you have to change the variable "accountName" to your account name..`);
+const start = () => {
+  if (ACCOUNT_NAME === 'YOUR_ACCOUNT_NAME_HERE') {
+    alert(`Error!\n\nBefore running this script you have to change the variable YOUR_ACCOUNT_NAME_HERE to your account name..`);
     return;
   }
   const currentLocation = window.location.href;
   if (currentLocation.indexOf('https://steemit.com') == -1
-    || currentLocation.indexOf(accountName) == -1) {
-    alert(`Error!\n\n${accountName} you have to run this script on Steemit, on your newly created post..`);
+    || currentLocation.indexOf(ACCOUNT_NAME) == -1) {
+    alert(`Error!\n\n${ACCOUNT_NAME} you have to run this script on Steemit, on your newly created post..`);
     return;
   }
   localStorage.setItem('dailyScriptBot_result', '0');
@@ -570,6 +570,6 @@ document['ation'] = `
   // SPECIAL_TREAT_TO_FIRSTCOMERS = false;
   // MAX_LINKS_PER_USER = 1;
   // NO_REPLY_TO_COMMENTERS = true;
-  accountName = 'YOUR_ACCOUNT_NAME_HERE'
-  start(accountName);
+  ACCOUNT_NAME = 'YOUR_ACCOUNT_NAME_HERE'; // normal browsers only..
+  start();
 `;
