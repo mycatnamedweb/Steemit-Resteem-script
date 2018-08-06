@@ -165,6 +165,7 @@ async function processUsersComments() {
         console.error(`After 15 s the post is still not there. Closing window..`);
         wPost && !wPost.closed && wPost.close();
         wPost = null;
+        setTimeout(() => processUsersComments(), 60 * 1000);
       }
     }, 15 * 1000);
     return;
@@ -187,7 +188,7 @@ async function readComments(k) {
     if (!commentsSection) {
       errorsToShowOnUI.push(`${new Date()} -- Cannot run readComments on this page: "${wPost.window.location.href}".<br>No comments section found.`);
       wPost.close();
-      setTimeout(() => processUsersComments(), 30000);
+      setTimeout(() => processUsersComments(), 60 * 1000);
       return console.error(`Unable to read comments, page did not load correctly. Will retry in 30 seconds.`);
     }
     anchorsComments = commentsSection.getElementsByTagName('a');
