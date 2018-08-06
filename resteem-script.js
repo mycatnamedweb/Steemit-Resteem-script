@@ -259,7 +259,7 @@ async function readComments(k) {
     users = Object.keys(toResteem);
     if (!users.length) {
       console.log(`${new Date().toString().split(' ').slice(1,5).join(' ')} :: ---- END ----`);
-      if (wPost && wPost.close) {
+      if (wPost && !wPost.closed) {
         wPost.close();
         wPost = null;
       }
@@ -347,7 +347,7 @@ async function startResteems() {
             console.error(`There are warnings. \n${JSON.stringify(warnings)}`);
           }
           buildUI();
-          if (wPost && wPost.close) {
+          if (wPost && !wPost.closed) {
             wPost.close();
             wPost = null;
           }
