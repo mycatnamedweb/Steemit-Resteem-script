@@ -151,6 +151,7 @@ const addDoNotCloseWarning = (wPost) => {
 
 // ===============================  [[[[[[ ENTRY POINT ]]]]]]
 let wPost;
+let retriedAlready = false;
 
 async function processUsersComments() {
   if (!wPost || !wPost.close || wPost.closed) {
@@ -165,7 +166,12 @@ async function processUsersComments() {
         console.error(`After 15 s the post is still not there. Closing window..`);
         wPost && !wPost.closed && wPost.close();
         wPost = null;
-        setTimeout(() => processUsersComments(), 60 * 1000);
+        if (!retriedAlready) {
+          setTimeout(() => processUsersComments(), 60 * 1000);
+          retriedAlready = true;
+        } else {
+          retriedAlready = !retriedAlready;
+        }
       }
     }, 15 * 1000);
     return;
