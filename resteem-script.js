@@ -163,7 +163,7 @@ async function processUsersComments() {
     });
     setTimeout(() => {
       if (!wPost || !wPost.document.getElementsByClassName('Post_comments__content')[0]) {
-        console.error(`After 15 s the post is still not there. Closing window..`);
+        console.error(`After 15 s the post is still not there. Closing window. Will trying once again in 1 min.`);
         wPost && !wPost.closed && wPost.close();
         wPost = null;
         if (!retriedAlready) {
