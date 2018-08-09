@@ -377,8 +377,16 @@ const isPostUpvoteBtn = (upvoteBtn, w) => {
 }
 
 const isRightWeightBtn = (weightBtn, win) => {
-  const name = weightBtn.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.innerText.split('by ')[1].split(' (')[0]
-  return win.window.location.href.indexOf(name) !== -1;
+  try {
+    const name = weightBtn.parentElement.parentElement.parentElement
+      .parentElement.parentElement.parentElement.parentElement
+      .parentElement.parentElement
+      .innerText.split('by ')[1].split(' (')[0]
+    return win.window.location.href.indexOf(name) !== -1;
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
 }
 
 async function execService(user, link) {
