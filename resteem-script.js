@@ -377,7 +377,7 @@ const isPostUpvoteBtn = (upvoteBtn, w) => {
 }
 
 const isRightWeightBtn = (weightBtn, win) => {
-  const name = weightBtn.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.innerText.split('[-]')[1].split(' (')[0]
+  const name = weightBtn.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.innerText.split('by ')[1].split(' (')[0]
   return win.window.location.href.indexOf(name) !== -1;
 }
 
