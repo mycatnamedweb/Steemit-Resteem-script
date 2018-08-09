@@ -3,7 +3,7 @@
 
 let ACCOUNT_NAME = 'YOUR_ACCOUNT_NAME_HERE' // ( eg. gaottantacinque - no @ ) <<~~---===## MANDATORY
 
-let NO_REPLY_TO_COMMENTERS = false;
+let NO_REPLY_TO_COMMENTERS = false; // NOTE: CHECK_NEW_COMMENTS too
 const COMMENT_AFTER_RESTEEMS_1 = `Done so far, thanks! :D`;
 const COMMENT_AFTER_RESTEEMS_2 = `Done! Thanks for using my free resteem service! :)`;
 const COMMENT_AFTER_RESTEEMS_3 = `All done until here`
@@ -19,10 +19,10 @@ const HOW_MANY_FIRSTCOMERS = 5;
 const SPECIAL_TREAT_IF_USER_RESTEEMS = true;
 const KEYWORD_IN_COMMENT_TO_GET_UPVOTE_AND_FOLLOW_1 = 'resteemed';
 const KEYWORD_IN_COMMENT_TO_GET_UPVOTE_AND_FOLLOW_2 = 're-steemed';
-const KEYWORD_IN_COMMENT_TO_GET_UPVOTE_AND_FOLLOW_3 = 'reblogged';
+const KEYWORD_IN_COMMENT_TO_GET_UPVOTE_AND_FOLLOW_3 = 'resteemd';
 const KEYWORD_IN_COMMENT_TO_GET_UPVOTE_AND_FOLLOW_4 = '~#_ADD (lowercase) KEYWORD HERE IF NEEDED_#~';
 
-const CHECK_NEW_COMMENTS_EVERY_N_MILLISECONS = 30 * 60 * 1000;  // 30 mins
+const CHECK_NEW_COMMENTS_EVERY_N_MILLISECONS = 30 * 60 * 1000;  // 30 or 60 mins
 const OPEN_USER_LINK_TO_RESTEEM_EVERY_N_MILLISECONDS = 13 * 1000; // 13 seconds
 
 // CHANGE THESE ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -365,6 +365,22 @@ async function startResteems() {
   }
 }
 
+const isPostUpvoteBtn = (upvoteBtn, w) => {
+  let resteemerName;
+  const block = upvoteBtn.parentElement.parentElement.parentElement.parentElement.parentElement;
+  if (block.children[0].innerText.split('by ').length === 1) {
+    resteemerName = block.parentElement.children[0].innerText.split('by ')[1].split(' (')[0];
+  } else {
+    resteemerName = block.children[0].innerText.split('by ')[1].split(' (')[0];
+  }
+  return w.window.location.href.indexOf(resteemerName) !== -1;
+}
+
+const isRightWeightBtn = (weightBtn, win) => {
+  const name = weightBtn.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.innerText.split('[-]')[1].split(' (')[0]
+  return win.window.location.href.indexOf(name) !== -1;
+}
+
 async function execService(user, link) {
   console.log(`Processing link ${link} for user ${user}`);
   let w;
@@ -389,7 +405,7 @@ async function execService(user, link) {
       const upvBtnBlock = w.document.querySelectorAll('span[class="Voting__button Voting__button-up"]')[0];
       const upvBtnType2 = upvBtnBlock && upvBtnBlock.firstChild.firstChild;
       const upvoteBtn = upvBtnType1 || upvBtnType2;
-      if (!upvoteBtn) {
+      if (!upvoteBtn || !isPostUpvoteBtn(upvoteBtn, w)) {
         errorsToShowOnUI.push(`${new Date()} -- No upvote button found on post. User ${user}, link ${link}. Skipping.`);
         return;
       }
@@ -400,8 +416,12 @@ async function execService(user, link) {
         await nap(3000);
         const weightBtn = w.document.querySelectorAll('a[class="confirm_weight"]')[0];
         if (weightBtn) {
-          weightBtn.click();
-          await nap(3000);
+          if (!isRightWeightBtn(weightBtn, w)) {
+            errorsToShowOnUI.push(`Weight button was not the post one for user ${user}. Not clicked.`);
+          } else {
+            weightBtn.click();
+            await nap(3000);
+          }
         }
       // }
       const dropdownArrow = w.document.getElementsByClassName('Icon dropdown-arrow')[0];
