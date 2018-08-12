@@ -234,24 +234,19 @@ async function readComments(k) {
           && parent && rightLink) {
         try {
           const parentArr = parent.split('/');
-          const notAchildComment = parentArr[1].indexOf(`/re-${ACCOUNT_NAME}`);
+          const notAchildComment = parentArr[1].indexOf(`/re-${ACCOUNT_NAME}`) == -1;
           const user = parentArr[0].substr(2, parentArr[0].length -1);
           if(firstTenToUpvAndFollow.length < HOW_MANY_FIRSTCOMERS
-              && firstTenToUpvAndFollow.indexOf(user) == -1) {
+              && firstTenToUpvAndFollow.indexOf(user) == -1
+              && blacklist.indexOf(user) == -1) {
             firstTenToUpvAndFollow.push(user);
           }
-          if(notAchildComment) {
+          if(notAchildComment && blacklist.indexOf(user) === -1) {
             let added = false;
             'a,'.repeat(MAX_LINKS_PER_USER - 1).split(',').forEach((_,id) => {
               const userAlias = `${user}${id > 0 ? `~${id}` : ''}`; // user, user~1, user~2
               if (!added && toResteem[userAlias] == undefined) {
                 toResteem[userAlias] = anchor.href;
-                // if (anchor.offsetParent.innerText.indexOf(' vote') !== -1 &&
-                //   anchor.offsetParent.innerText.indexOf('Reply') !== -1 &&
-                //   upvotedStore[user] == undefined) {
-                //     upvotedStore[user] = anchor.href;
-                //     upvotedLinks[user] = anchor.href;
-                // }
                 added = true;
               }
             })
@@ -261,7 +256,6 @@ async function readComments(k) {
         }
       }
     });
-    // toResteem = Object.assign({}, toResteem, upvotedLinks);
     console.log(`Links to resteem: ${Object.keys(toResteem).length} -->> ${JSON.stringify(toResteem)}`);
     users = Object.keys(toResteem);
     if (!users.length) {
