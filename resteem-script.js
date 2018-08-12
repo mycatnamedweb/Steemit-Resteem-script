@@ -3,7 +3,7 @@
 
 let ACCOUNT_NAME = 'YOUR_ACCOUNT_NAME_HERE' // ( eg. gaottantacinque - no @ ) <<~~---===## MANDATORY
 
-let NO_REPLY_TO_COMMENTERS = false; // NOTE: CHECK_NEW_COMMENTS too
+let NO_REPLY_TO_COMMENTERS = false;
 const COMMENT_AFTER_RESTEEMS_1 = `Done so far, thanks! :D`;
 const COMMENT_AFTER_RESTEEMS_2 = `Done! Thanks for using my free resteem service! :)`;
 const COMMENT_AFTER_RESTEEMS_3 = `All done until here`
@@ -183,6 +183,8 @@ async function processUsersComments() {
   });
 }
 
+let storedLastCommentTxt = '';
+
 async function readComments(k) {
   try {
     oldSeparatorDelBtn = null;
@@ -197,6 +199,16 @@ async function readComments(k) {
       setTimeout(() => processUsersComments(), 60 * 1000);
       return console.error(`Unable to read comments, page did not load correctly. Will retry in 30 seconds.`);
     }
+    if (NO_REPLY_TO_COMMENTERS) {
+      const lastCommentTxt = commentsSection.querySelectorAll('div[class="Comment__body entry-content"]')[0].innerText;
+      if (lastCommentTxt === storedLastCommentTxt) {
+        console.log(`No replies to users and latest comment matches. Stopping.`);
+        k();
+        return;
+      }
+      storedLastCommentTxt = lastCommentTxt;
+    }
+
     anchorsComments = commentsSection.getElementsByTagName('a');
     const commentIds = Object.keys(anchorsComments);
     const lastAnchor = anchorsComments[commentIds[commentIds.length - 5]];
@@ -206,6 +218,7 @@ async function readComments(k) {
     if (!lastAnchor) {
       console.log('>>>>> NO LINKS ON YOUR POST YET.');
       k();
+      return;
     }
     let skipNext = false;
     let noMoreBcFoundSeparator = false;
@@ -598,7 +611,6 @@ document['ation'] = `
 
   // SPECIAL_TREAT_TO_FIRSTCOMERS = false;
   // MAX_LINKS_PER_USER = 1;
-  // NO_REPLY_TO_COMMENTERS = true;
-  ACCOUNT_NAME = 'YOUR_ACCOUNT_NAME_HERE'; // normal browsers only..
+  ACCOUNT_NAME = 'YOUR_ACCOUNT_NAME_HERE'; // NO Edge..
   start();
 `;
