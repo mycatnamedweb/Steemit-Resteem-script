@@ -185,6 +185,13 @@ async function processUsersComments() {
 
 let storedLastCommentTxt = '';
 
+const closeWin = () => {
+  if (wPost && !wPost.closed) {
+    wPost.close();
+    wPost = null;
+  }
+}
+
 async function readComments(k) {
   try {
     oldSeparatorDelBtn = null;
@@ -204,6 +211,7 @@ async function readComments(k) {
       if (lastCommentTxt === storedLastCommentTxt) {
         console.log(`No replies to users and latest comment matches. Stopping.`);
         k();
+        closeWin(wPost);
         return;
       }
       storedLastCommentTxt = lastCommentTxt;
@@ -218,6 +226,7 @@ async function readComments(k) {
     if (!lastAnchor) {
       console.log('>>>>> NO LINKS ON YOUR POST YET.');
       k();
+      closeWin(wPost);
       return;
     }
     let skipNext = false;
@@ -273,10 +282,7 @@ async function readComments(k) {
     users = Object.keys(toResteem);
     if (!users.length) {
       console.log(`${new Date().toString().split(' ').slice(1,5).join(' ')} :: ---- END ----`);
-      if (wPost && !wPost.closed) {
-        wPost.close();
-        wPost = null;
-      }
+      closeWin(wPost);
     }
     k();
   } catch (err) {
