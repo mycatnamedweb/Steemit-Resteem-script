@@ -410,6 +410,10 @@ async function execService(user, link) {
       console.log(`Service for blacklisted user rejected.`);
       return;
     }
+    if (link.indexOf('@') == -1 || link.indexOf('/@resteem.bot') !== -1) {
+      console.log(`Unathorized link. Skipping.`);
+      return;
+    }
     w = open(link);
     await nap(5000);
     const userInFirstTen_index = firstTenToUpvAndFollow.indexOf(user);
