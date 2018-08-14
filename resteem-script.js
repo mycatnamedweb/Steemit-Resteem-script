@@ -202,7 +202,7 @@ async function readComments(k) {
     const commentsSection = wPost.document.getElementsByClassName('Post_comments__content')[0];
     if (!commentsSection) {
       errorsToShowOnUI.push(`${new Date()} -- Cannot run readComments on this page: "${wPost.window.location.href}".<br>No comments section found.`);
-      wPost.close();
+      wPost && wPost.close();
       setTimeout(() => processUsersComments(), 60 * 1000);
       return console.error(`Unable to read comments, page did not load correctly. Will retry in 30 seconds.`);
     }
@@ -503,7 +503,7 @@ async function execService(user, link) {
   } catch(err) {
       errorsToShowOnUI.push(`${new Date()} -- Something went wrong processing post for user ${user}. Error: `, err);
   } finally {
-    w.close();
+    w && w.close();
   }
 }
 
