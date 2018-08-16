@@ -402,6 +402,19 @@ const isRightWeightBtn = (weightBtn, win) => {
   }
 }
 
+async function expandIfMyPostAndHidden(w, user) {
+  var showButton = w.document.querySelectorAll('button[class="button hollow tiny float-right"]')[0];
+  if (showButton && showButton.innerText.toLowerCase() === 'show') {
+    const currLocation = window.location.href;
+    if (currLocation.indexOf(ACCOUNT_NAME) === -1) {
+      throw new Error(`Hidden post for user ${user} - and it's not me`);
+    }
+    errors.push(`resteemPost -- my post for ${user} was hidden. Now resteeming and upvoting.`);
+    showButton.click();
+    await sleep(1000);
+  }
+}
+
 async function execService(user, link) {
   console.log(`Processing link ${link} for user ${user}`);
   let w;
@@ -416,6 +429,8 @@ async function execService(user, link) {
     }
     w = open(link);
     await nap(5000);
+    await expandIfMyPostAndHidden(w, user);
+
     const userInFirstTen_index = firstTenToUpvAndFollow.indexOf(user);
     const currentComment = wPost.document.getElementsByClassName('Post_comments__content')[0]
       .querySelectorAll(`[href='${link}']`)[0];
