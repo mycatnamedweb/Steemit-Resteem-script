@@ -203,7 +203,7 @@ async function expandIfMyPostAndHidden(w, user) {
     }
     console.log(`Clicking..`);
     showButton.click();
-    await sleep(1000);
+    await nap(1000);
   } else {
     console.log(`No need to expand the post.`);
   }
@@ -387,8 +387,11 @@ async function startResteems() {
           }
           buildUI();
           if (wPost && !wPost.closed) {
+            console.log(`Closing the window..`);
             wPost.close();
             wPost = null;
+          } else {
+            console.log(`NOT closing the window. Null or already closed.`);
           }
           localStorage.setItem('dailyScriptBot_result', resteemsCount);
         }, 10000); // wait 10 seconds more for pending errors..
