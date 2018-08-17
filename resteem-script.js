@@ -405,7 +405,7 @@ const isRightWeightBtn = (weightBtn, win) => {
 async function expandIfMyPostAndHidden(w, user) {
   var showButton = w.document.querySelectorAll('button[class="button hollow tiny float-right"]')[0];
   if (showButton && showButton.innerText.toLowerCase() === 'show') {
-    const currLocation = window.location.href;
+    const currLocation = w.window.location.href;
     if (currLocation.indexOf(ACCOUNT_NAME) === -1) {
       throw new Error(`Hidden post for user ${user} - and it's not me`);
     }
