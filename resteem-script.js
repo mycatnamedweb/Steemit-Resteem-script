@@ -163,7 +163,7 @@ async function processUsersComments() {
     });
     setTimeout(() => {
       if (!wPost || !wPost.document.getElementsByClassName('Post_comments__content')[0]) {
-        console.error(`After 15 s the post is still not there. Closing window. Will trying once again in 1 min.`);
+        console.error(`After 30 s the post is still not there. Closing window. Will trying once again in 1 min.`);
         wPost && !wPost.closed && wPost.close();
         wPost = null;
         if (!retriedAlready) {
@@ -173,9 +173,10 @@ async function processUsersComments() {
           retriedAlready = !retriedAlready;
         }
       }
-    }, 15 * 1000);
+    }, 30 * 1000);
     return;
   }
+  console.log(`ok, window found. Starting..`);
   readComments(() => {
     users.length && replyToPost(() => {
       users.length && startResteems();
@@ -195,13 +196,16 @@ const closeWin = () => {
 async function expandIfMyPostAndHidden(w, user) {
   var showButton = w.document.querySelectorAll('button[class="button hollow tiny float-right"]')[0];
   if (showButton && showButton.innerText.toLowerCase() === 'show') {
+    console.error(`My post was hidden. Expanding it..`);
     const currLocation = w.window.location.href;
     if (currLocation.indexOf(ACCOUNT_NAME) === -1) {
       throw new Error(`Hidden post for user ${user} - and it's not me`);
     }
-    errors.push(`resteemPost -- my post for ${user} was hidden. Now resteeming and upvoting.`);
+    console.log(`Clicking..`);
     showButton.click();
     await sleep(1000);
+  } else {
+    console.log(`No need to expand the post.`);
   }
 }
 
