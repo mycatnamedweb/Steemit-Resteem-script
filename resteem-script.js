@@ -412,11 +412,13 @@ const isPostUpvoteBtn = (upvoteBtn, w) => {
 }
 
 const isRightWeightBtn = (weightBtn, win) => {
+  console.log(`Checking weight btn ownership..`);
   try {
     const name = weightBtn.parentElement.parentElement.parentElement
       .parentElement.parentElement.parentElement.parentElement
       .parentElement.parentElement
       .innerText.split('by ')[1].split(' (')[0]
+    console.log(`The owner is ${name}`);
     return win.window.location.href.indexOf(name) !== -1;
   } catch (err) {
     console.error(err);
