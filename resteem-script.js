@@ -310,9 +310,9 @@ async function readComments(k) {
 }
 
 async function replyToPost(k) {
-  if (NO_REPLY_TO_COMMENTERS) {
+  if (NO_REPLY_TO_COMMENTERS || (users.length === 1 && toResteem[users[0]].indexOf('@') === -1)) {
     k();
-    return;
+    return console.log('No reply added.');
   }
   try {
     if (oldSeparatorDelBtn && DELETE_OLD_SEPARATOR_WHEN_NEW_COMMENTS) {
