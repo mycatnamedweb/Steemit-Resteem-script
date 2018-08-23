@@ -402,31 +402,42 @@ async function startResteems() {
 
 const isPostUpvoteBtn = (upvoteBtn, w) => {
   let resteemerName;
-  const block = upvoteBtn.parentElement.parentElement.parentElement.parentElement.parentElement;
-  if (block.children[0].innerText.split('by ').length === 1) {
-    resteemerName = block.parentElement.children[0].innerText.split('by ')[1].split(' (')[0];
-  } else {
-    resteemerName = block.children[0].innerText.split('by ')[1].split(' (')[0];
-  }
-  return w.window.location.href.indexOf(resteemerName) !== -1;
-}
-
-const isRightWeightBtn = (weightBtn, win) => {
-  console.log(`Checking weight btn ownership..`);
+  let block;
   try {
-    const name = weightBtn.parentElement.parentElement.parentElement
-      .parentElement.parentElement.parentElement.parentElement
-      .parentElement.parentElement
-      .innerText.split('by ')[1].split(' (')[0]
-    console.log(`The owner is ${name}`);
-    return win.window.location.href.indexOf(name) !== -1;
+    block = upvoteBtn.parentElement.parentElement.parentElement.parentElement.parentElement;
+    if (block.children[0].innerText.split('by ').length === 1) {
+      resteemerName = block.parentElement.children[0].innerText.split('by ')[1].split(' (')[0];
+    } else {
+      resteemerName = block.children[0].innerText.split('by ')[1].split(' (')[0];
+    }
+    return w.window.location.href.indexOf(resteemerName) !== -1;
   } catch (err) {
-    console.error(err);
+    const msg = `${new Date()} _ isPostUpvoteBtn -- Err: ${err}. Block html: ${block.innerHTML}`;
+    console.error(msg);
+    errorsToShowOnUI.push(msg);
     return false;
   }
 }
 
-async function execService(user, link) {
+const isRightWeightBtn = (weightBtn, win) => {
+  console.log(`Checking weight btn ownership..`);
+  let block;
+  try {
+    block = weightBtn.parentElement.parentElement.parentElement
+      .parentElement.parentElement.parentElement.parentElement
+      .parentElement.parentElement;
+    const name = block.innerText.split('by ')[1].split(' (')[0]
+    console.log(`The owner is ${name}`);
+    return win.window.location.href.indexOf(name) !== -1;
+  } catch (err) {
+    const msg = `${new Date()} _ isRightWeightBtn -- Err: ${err}. Block html: ${block.innerHTML}`;
+    console.error(msg);
+    errorsToShowOnUI.push(msg);
+    return false;
+  }
+}
+
+async function execService(user = '', link) {
   console.log(`Processing link ${link} for user ${user}`);
   let w;
   try {
@@ -526,7 +537,9 @@ async function execService(user, link) {
       }
     }
   } catch(err) {
-      errorsToShowOnUI.push(`${new Date()} -- Something went wrong processing post for user ${user}. Error: `, err);
+    const msg = `${new Date()} -- Something went wrong processing post for user ${user}. Error: ${err}`;
+    console.error(msg);
+    errorsToShowOnUI.push(msg);
   } finally {
     w && w.close();
   }
