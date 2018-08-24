@@ -400,19 +400,24 @@ async function startResteems() {
   }
 }
 
-const isPostUpvoteBtn = (upvoteBtn, w) => {
+const isPostUpvoteBtn = (upvoteBtn, link) => {
+  console.log(`${now()} -- checking if it's post upvote btn..`);
   let resteemerName;
   let block;
   try {
     block = upvoteBtn.parentElement.parentElement.parentElement.parentElement.parentElement;
     if (block.children[0].innerText.split('by ').length === 1) {
-      resteemerName = block.parentElement.children[0].innerText.split('by ')[1].split(' (')[0];
+      console.log('branch1');
+      // resteemerName = block.parentElement.children[0].innerText.split('by ')[1].split(' (')[0];
+      resteemerName = block.parentElement.querySelectorAll('a[class="ptc"]')[0].href.split('/').pop();
     } else {
+      console.log('branch2');
       resteemerName = block.children[0].innerText.split('by ')[1].split(' (')[0];
     }
-    return w.window.location.href.indexOf(resteemerName) !== -1;
+    console.log(`Upvote button of user ${resteemerName}`);
+    return link.indexOf(resteemerName) !== -1;
   } catch (err) {
-    const msg = `${new Date()} _ isPostUpvoteBtn -- Err: ${err}. Block html: ${block.innerHTML}`;
+    const msg = `${new Date()} _ isPostUpvoteBtn -- Err: ${err}`;
     console.error(msg);
     errorsToShowOnUI.push(msg);
     return false;
@@ -466,7 +471,7 @@ async function execService(user = '', link) {
       const upvBtnBlock = w.document.querySelectorAll('span[class="Voting__button Voting__button-up"]')[0];
       const upvBtnType2 = upvBtnBlock && upvBtnBlock.firstChild.firstChild;
       const upvoteBtn = upvBtnType1 || upvBtnType2;
-      if (!upvoteBtn || !isPostUpvoteBtn(upvoteBtn, w)) {
+      if (!upvoteBtn || !isPostUpvoteBtn(upvoteBtn, link)) {
         errorsToShowOnUI.push(`${new Date()} -- No upvote button found on post. User ${user}, link ${link}. Skipping.`);
         return;
       }
