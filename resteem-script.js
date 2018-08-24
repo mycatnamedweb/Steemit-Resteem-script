@@ -288,7 +288,7 @@ async function readComments(k) {
               const userAlias = `${user}${id > 0 ? `~${id}` : ''}`; // user, user~1, user~2
               const link = anchor.href;
               if (!added && toResteem[userAlias] == undefined
-                  && link.indexOf('@resteem.bot') == -1 && link.indexOf('@marcocasario') == -1 && link.indexOf('@rcr.bis') == -1) {
+                  && link.indexOf('@resteem.bot') == -1 && link.indexOf('@marcocasario') == -1 && link.indexOf('@rcr.bis') == -1 && link.indexOf('/trending/') == -1) {
                 toResteem[userAlias] = anchor.href;
                 added = true;
               }
