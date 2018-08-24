@@ -286,7 +286,9 @@ async function readComments(k) {
             let added = false;
             'a,'.repeat(MAX_LINKS_PER_USER - 1).split(',').forEach((_,id) => {
               const userAlias = `${user}${id > 0 ? `~${id}` : ''}`; // user, user~1, user~2
-              if (!added && toResteem[userAlias] == undefined) {
+              const link = anchor.href;
+              if (!added && toResteem[userAlias] == undefined
+                  && link.indexOf('@resteem.bot') == -1 && link.indexOf('@marcocasario') == -1 && link.indexOf('@rcr.bis') == -1) {
                 toResteem[userAlias] = anchor.href;
                 added = true;
               }
