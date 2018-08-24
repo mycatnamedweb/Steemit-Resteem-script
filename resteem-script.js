@@ -404,7 +404,7 @@ async function startResteems() {
 }
 
 const isPostUpvoteBtn = (upvoteBtn, link) => {
-  console.log(`${now()} -- checking if it's post upvote btn..`);
+  console.log(`-- checking if it's post upvote btn..`);
   let resteemerName;
   let block;
   try {
