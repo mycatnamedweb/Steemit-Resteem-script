@@ -111,7 +111,7 @@ const comments = [
   COMMENT_AFTER_RESTEEMS_3,
 ];
 const getComment = (oneUserOnly = false) => {
-  if (oneUserOnly) return COMMENT_AFTER_RESTEEMS_2;
+  if (oneUserOnly) return COMMENT_AFTER_RESTEEMS_3;
   if (EACH_BROWSER_DIFFERENT_COMMENT) {
     const brsId = getId(extractUA());
     return comments[brsId];
