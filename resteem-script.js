@@ -4,9 +4,12 @@
 let ACCOUNT_NAME = 'YOUR_ACCOUNT_NAME_HERE' // ( eg. gaottantacinque - no @ ) <<~~---===## MANDATORY
 
 let NO_REPLY_TO_COMMENTERS = false;
-const COMMENT_AFTER_RESTEEMS_1 = `Ressteems done so far, thanks! :D`;
-const COMMENT_AFTER_RESTEEMS_2 = `Resteem done! Thanks for using my free resteem service! :)\n<sub>( the upvote for who also resteemed may take longer )</sub>`;
-const COMMENT_AFTER_RESTEEMS_3 = `All resteems done until here`
+const COMMENT_AFTER_RESTEEMS_1 = `Done so far, thanks! :D`;
+const COMMENT_AFTER_RESTEEMS_2 = `Done! Thanks for using my free resteem service! :)`;
+const COMMENT_AFTER_RESTEEMS_3 = `All done until here`
+// const COMMENT_AFTER_RESTEEMS_1 = `Ressteems done so far, thanks! :D`;
+// const COMMENT_AFTER_RESTEEMS_2 = `Resteem done! Thanks for using my free resteem service! :)\n<sub>( the upvote for who also resteemed may take longer )</sub>`;
+// const COMMENT_AFTER_RESTEEMS_3 = `All resteems done until here`
 const EACH_BROWSER_DIFFERENT_COMMENT = true;
 const MENTION_USERS_IN_SEPARATORS = true;
 const DELETE_OLD_SEPARATOR_WHEN_NEW_COMMENTS = false;
