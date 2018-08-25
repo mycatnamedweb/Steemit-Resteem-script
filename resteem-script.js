@@ -427,7 +427,7 @@ const isPostUpvoteBtn = (upvoteBtn, link) => {
   }
 }
 
-const isRightWeightBtn = (weightBtn, win) => {
+const isRightWeightBtn = (weightBtn, link) => {
   console.debug(`Checking weight btn ownership..`);
   let block;
   try {
@@ -436,9 +436,9 @@ const isRightWeightBtn = (weightBtn, win) => {
       .parentElement.parentElement;
     const name = block.innerText.split('by ')[1].split(' (')[0]
     console.debug(`The owner is ${name}`);
-    return win.window.location.href.indexOf(name) !== -1;
+    return link.indexOf(name) !== -1;
   } catch (err) {
-    const msg = `${new Date()} _ isRightWeightBtn -- Err: ${err}. Block html: ${block.innerHTML}`;
+    const msg = `${new Date()} _ isRightWeightBtn -- Err: ${err}. Link: ${link}. Block html: ${block.innerHTML}`;
     console.error(msg);
     errorsToShowOnUI.push(msg);
     return false;
@@ -485,7 +485,7 @@ async function execService(user = '', link) {
         await nap(3000);
         const weightBtn = w.document.querySelectorAll('a[class="confirm_weight"]')[0];
         if (weightBtn) {
-          if (!isRightWeightBtn(weightBtn, w)) {
+          if (!isRightWeightBtn(weightBtn, link)) {
             errorsToShowOnUI.push(`Weight button was not the post one for user ${user}. Not clicked.`);
           } else {
             weightBtn.click();
