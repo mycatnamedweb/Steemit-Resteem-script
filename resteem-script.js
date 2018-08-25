@@ -49,10 +49,10 @@ const blacklist = storedBl ? storedBl.split(',') : ['resteem.bot'];
 
 // ================================ UTILITIES
 function nap(durationMs) {
-  console.log('Taking a nap..');
+  console.debug('Taking a nap..');
   const start = new Date().getTime();
   return new Promise(resolve => setTimeout(() => {
-    console.log(`waking up after ${(new Date().getTime() - start) / 1000} seconds`)
+    console.debug(`waking up after ${(new Date().getTime() - start) / 1000} seconds`)
     resolve();
   }, durationMs));
 }
@@ -126,7 +126,7 @@ const openPost = () => open(window.location.href,'_blank');
 const addDoNotCloseWarning = (wPost) => {
   try {
     if (!wPost) throw new Error(`Reference to the post window was missing in addDoNotCloseWarning.`);
-    console.log('Adding donotclosewarning to other tab..');
+    console.debug('Adding donotclosewarning to other tab..');
     const divToAdd = wPost.document.createElement('div');
     divToAdd.id = 'donotclosewarning';
     const myStyle = divToAdd.style;
@@ -155,7 +155,7 @@ let retriedAlready = false;
 
 async function processUsersComments() {
   if (!wPost || !wPost.close || wPost.closed) {
-    console.log(`Opening post ${window.location.href} in a new tab..`);
+    console.debug(`Opening post ${window.location.href} in a new tab..`);
     wPost = open(`${window.location.href}?sort=new#comments`,'_blank');
     wPost.addEventListener('load', () => {
       setTimeout(() => processUsersComments(), 5000);
@@ -176,7 +176,7 @@ async function processUsersComments() {
     }, 30 * 1000);
     return;
   }
-  console.log(`ok, window found. Starting..`);
+  console.debug(`ok, window found. Starting..`);
   readComments(() => {
     users.length && replyToPost(() => {
       users.length && startResteems();
@@ -201,11 +201,11 @@ async function expandIfMyPostAndHidden(w, user) {
     if (currLocation.indexOf(ACCOUNT_NAME) === -1) {
       throw new Error(`Hidden post for user ${user} - and it's not me`);
     }
-    console.log(`Clicking..`);
+    console.debug(`Clicking..`);
     showButton.click();
     await nap(1000);
   } else {
-    console.log(`No need to expand the post.`);
+    console.debug(`No need to expand the post.`);
   }
 }
 
@@ -228,7 +228,7 @@ async function readComments(k) {
     if (NO_REPLY_TO_COMMENTERS) {
       const lastCommentTxt = commentsSection.querySelectorAll('div[class="Comment__body entry-content"]')[0].innerText;
       if (lastCommentTxt === storedLastCommentTxt) {
-        console.log(`No replies to users and latest comment matches. Stopping.`);
+        console.debug(`No replies to users and latest comment matches. Stopping.`);
         k();
         closeWin(wPost);
         return;
@@ -241,9 +241,9 @@ async function readComments(k) {
     const lastAnchor = anchorsComments[commentIds[commentIds.length - 5]];
     failed = [], warnings = [];
 
-    console.log('Getting links from comments');
+    console.debug('Getting links from comments');
     if (!lastAnchor) {
-      console.log('>>>>> NO LINKS ON YOUR POST YET.');
+      console.debug('>>>>> NO LINKS ON YOUR POST YET.');
       k();
       closeWin(wPost);
       return;
@@ -253,11 +253,11 @@ async function readComments(k) {
     commentIds.forEach((idx) => {
       const anchor = anchorsComments[idx];
       if (isMySeparator(anchor)) {
-        console.log('Comments found so far were already resteemed, discarding them');
+        console.debug('Comments found so far were already resteemed, discarding them');
         // toResteem = {};
         if (commentIds.length > +idx + 6) {
           if (!skipNext) {
-            console.log(`Position of old separator saved.`);
+            console.debug(`Position of old separator saved.`);
             const anchors = anchor.offsetParent.querySelectorAll('a');
             const delBtn = anchors[anchors.length - 1];
             oldSeparatorDelBtn = delBtn;
@@ -300,10 +300,10 @@ async function readComments(k) {
         }
       }
     });
-    console.log(`Links to resteem: ${Object.keys(toResteem).length} -->> ${JSON.stringify(toResteem)}`);
+    console.debug(`Links to resteem: ${Object.keys(toResteem).length} -->> ${JSON.stringify(toResteem)}`);
     users = Object.keys(toResteem);
     if (!users.length) {
-      console.log(`${new Date().toString().split(' ').slice(1,5).join(' ')} :: ---- END ----`);
+      console.debug(`${new Date().toString().split(' ').slice(1,5).join(' ')} :: ---- END ----`);
       closeWin(wPost);
     }
     k();
@@ -315,12 +315,12 @@ async function readComments(k) {
 async function replyToPost(k) {
   if (NO_REPLY_TO_COMMENTERS || (users.length === 1 && toResteem[users[0]].indexOf('@') === -1)) {
     k();
-    return console.log('No reply added.');
+    return console.debug('No reply added.');
   }
   try {
     if (oldSeparatorDelBtn && DELETE_OLD_SEPARATOR_WHEN_NEW_COMMENTS) {
       try {
-        console.log('Deleting old separator since there are new comments to process..');
+        console.debug('Deleting old separator since there are new comments to process..');
         oldSeparatorDelBtn.click();
         await nap(2000);
         const confirmBtn = wPost.document.getElementsByClassName('ConfirmTransactionForm')[0].children[4];
@@ -341,7 +341,7 @@ async function replyToPost(k) {
       });
       if (usersNoAlias.length) myComment += `\n@${usersNoAlias.join(', @')}`;
     }
-    console.log(`Adding comment: ${myComment}`);
+    console.debug(`Adding comment: ${myComment}`);
     let replyBtn = document.getElementsByClassName('PostFull__reply')[0]
       .getElementsByTagName('a')[0];
     replyBtn.click();
@@ -351,7 +351,7 @@ async function replyToPost(k) {
     textarea.dispatchEvent(new Event('input', { bubbles: true }));
     await nap(500);
     let postReplyBtn = document.querySelectorAll('[type=submit]')[0];
-    console.log(`Sumbitting reply..`);
+    console.debug(`Sumbitting reply..`);
     postReplyBtn.click();
     await nap(1000);
   } catch (err) {
@@ -364,7 +364,7 @@ let intervalValueRul;
 async function startResteems() {
   let idx = 0;
   if(users.length) {
-    console.log('==========> Launching all resteems..!');
+    console.debug('==========> Launching all resteems..!');
     intervalValueRul = setInterval(() => {
       if(idx < users.length) {
         execService(users[idx], toResteem[users[idx]]);
@@ -390,11 +390,11 @@ async function startResteems() {
           }
           buildUI();
           if (wPost && !wPost.closed) {
-            console.log(`Closing the window..`);
+            console.debug(`Closing the window..`);
             wPost.close();
             wPost = null;
           } else {
-            console.log(`NOT closing the window. Null or already closed.`);
+            console.debug(`NOT closing the window. Null or already closed.`);
           }
           localStorage.setItem('dailyScriptBot_result', resteemsCount);
         }, 10000); // wait 10 seconds more for pending errors..
@@ -404,20 +404,20 @@ async function startResteems() {
 }
 
 const isPostUpvoteBtn = (upvoteBtn, link) => {
-  console.log(`-- checking if it's post upvote btn..`);
+  console.debug(`-- checking if it's post upvote btn..`);
   let resteemerName;
   let block;
   try {
     block = upvoteBtn.parentElement.parentElement.parentElement.parentElement.parentElement;
     if (block.children[0].innerText.split('by ').length === 1) {
-      console.log('branch1');
+      console.debug('branch1');
       // resteemerName = block.parentElement.children[0].innerText.split('by ')[1].split(' (')[0];
       resteemerName = block.parentElement.querySelectorAll('a[class="ptc"]')[0].href.split('/').pop();
     } else {
-      console.log('branch2');
+      console.debug('branch2');
       resteemerName = block.children[0].innerText.split('by ')[1].split(' (')[0];
     }
-    console.log(`Upvote button of user ${resteemerName}`);
+    console.debug(`Upvote button of user ${resteemerName}`);
     return link.indexOf(resteemerName) !== -1;
   } catch (err) {
     const msg = `${new Date()} _ isPostUpvoteBtn -- Err: ${err}`;
@@ -428,14 +428,14 @@ const isPostUpvoteBtn = (upvoteBtn, link) => {
 }
 
 const isRightWeightBtn = (weightBtn, win) => {
-  console.log(`Checking weight btn ownership..`);
+  console.debug(`Checking weight btn ownership..`);
   let block;
   try {
     block = weightBtn.parentElement.parentElement.parentElement
       .parentElement.parentElement.parentElement.parentElement
       .parentElement.parentElement;
     const name = block.innerText.split('by ')[1].split(' (')[0]
-    console.log(`The owner is ${name}`);
+    console.debug(`The owner is ${name}`);
     return win.window.location.href.indexOf(name) !== -1;
   } catch (err) {
     const msg = `${new Date()} _ isRightWeightBtn -- Err: ${err}. Block html: ${block.innerHTML}`;
@@ -446,15 +446,15 @@ const isRightWeightBtn = (weightBtn, win) => {
 }
 
 async function execService(user = '', link) {
-  console.log(`Processing link ${link} for user ${user}`);
+  console.debug(`Processing link ${link} for user ${user}`);
   let w;
   try {
     if (blacklist.indexOf(user.split('~')[0]) !== -1) {
-      console.log(`Service for blacklisted user rejected.`);
+      console.debug(`Service for blacklisted user rejected.`);
       return;
     }
     if (link.indexOf('@') == -1 || link.indexOf('/@resteem.bot') !== -1) {
-      console.log(`Unathorized link. Skipping.`);
+      console.debug(`Unathorized link. Skipping.`);
       return;
     }
     w = open(link);
@@ -469,7 +469,7 @@ async function execService(user = '', link) {
       && currentComment.parentElement.parentElement.innerText.toLowerCase();
     if ( (SPECIAL_TREAT_IF_USER_RESTEEMS && userSaysHeResteemed(userMsg)) ||
          (SPECIAL_TREAT_TO_FIRSTCOMERS && userInFirstTen_index !== -1 ) ) {
-      console.log(`SPECIAL TREAT for user ${user}.\n 1. Upvoting post`);
+      console.debug(`SPECIAL TREAT for user ${user}.\n 1. Upvoting post`);
       const upvBtnType1 = w.document.getElementById('upvote_button');
       const upvBtnBlock = w.document.querySelectorAll('span[class="Voting__button Voting__button-up"]')[0];
       const upvBtnType2 = upvBtnBlock && upvBtnBlock.firstChild.firstChild;
@@ -479,7 +479,7 @@ async function execService(user = '', link) {
         return;
       }
       // if (upvoteBtn.title === 'Remove Vote') {
-      //   console.log(`Post ${link} Was already upvoted..`);
+      //   console.debug(`Post ${link} Was already upvoted..`);
       // } else if (upvoteBtn.title === 'Upvote') {
         upvoteBtn.click();
         await nap(3000);
@@ -500,7 +500,7 @@ async function execService(user = '', link) {
       }
       dropdownArrow.click();
       await nap(500);
-      console.log(`2. Clicking on FOLLOW for user ${user}`);
+      console.debug(`2. Clicking on FOLLOW for user ${user}`);
       const followBtn = w.document.getElementsByClassName('button slim hollow secondary ')[0];
       if (followBtn.innerText.toUpperCase() === 'FOLLOW') {
         followBtn.click();
@@ -508,12 +508,12 @@ async function execService(user = '', link) {
         if(followBtn.innerText.toUpperCase() !== 'UNFOLLOW') {
           const msg = `(maybe) was not able to follow ${user}`;
           warnings.push(msg);
-          console.log(msg);
+          console.debug(msg);
         }
       }
     }
 
-    console.log('Resteeming post for user', user);
+    console.debug('Resteeming post for user', user);
     const resteemBtn = w.document.querySelectorAll('a[title=Resteem]')[0]
     if (!resteemBtn) {
       errorsToShowOnUI.push(`${new Date()} -- Resteem button not found for user ${user} and link ${link}. Post may be expired.`);
@@ -521,7 +521,7 @@ async function execService(user = '', link) {
     }
     resteemBtn.click();
     await nap(500);
-    console.log('Confirming Resteem..');
+    console.debug('Confirming Resteem..');
     const confirmForm = w.document.getElementsByClassName('ConfirmTransactionForm')[0]
     if(confirmForm) {
       confirmForm.getElementsByTagName('button')[0].click();
@@ -529,7 +529,7 @@ async function execService(user = '', link) {
     }
     const resteemOk = w.document.getElementsByClassName('Reblog__button Reblog__button-active')[0];
     if(resteemOk && confirmForm) {
-      console.log('==> SUCCESS.');
+      console.debug('==> SUCCESS.');
       if (resteemedLinksOnThisPost.indexOf(link) == -1) {
         resteemedLinksOnThisPost.push(link);
         resteemsCount++;
@@ -538,7 +538,7 @@ async function execService(user = '', link) {
       errorsToShowOnUI.push(`${new Date()} -- Post Was already resteemed. User: ${user}`);
     } else {
       const msg = `FAILED? Grey Resteem for ${user} -> ${link}`;
-      console.log(msg);
+      console.debug(msg);
       if (resteemedLinksOnThisPost.indexOf(link) == -1) {
         resteemedLinksOnThisPost.push(link);
         resteemsCount++;
@@ -566,13 +566,13 @@ async function buildUI () {
   const x = document.getElementsByTagName('body')[0];
   const injectedDiv = document.getElementById('injected-ui');
   if (!injectedDiv) {
-    console.log('Building the UI ..');
+    console.debug('Building the UI ..');
     divToAdd = document.createElement('div');
     divToAdd.id = 'injected-ui';
     divToAdd.style.padding = '20px'
     divToAdd.style['background-color'] = '#333333';
   } else {
-    console.log('Refreshing the UI ..');
+    console.debug('Refreshing the UI ..');
   }
   const content = `
     <h3 style="margin:5px auto 20px">
@@ -611,7 +611,7 @@ async function buildUI () {
     divToAdd.style.padding = '5px';
     divToAdd.innerHTML = content;
     document.body.insertBefore(divToAdd, document.body.firstChild);
-    console.log('UI created. Now getting rid of some outdated steemit content..');
+    console.debug('UI created. Now getting rid of some outdated steemit content..');
     document.getElementsByClassName('Post_comments__content')[0].innerHTML = '';
     document.getElementsByClassName('PostFull__time_author_category_large vcard')[0].innerHTML = '';
     document.getElementsByClassName('PostFull__body entry-content')[0].innerHTML = '';
@@ -625,7 +625,7 @@ async function buildUI () {
     </a>`;
   } else {
     injectedDiv.innerHTML = content;
-    console.log('UI refreshed');
+    console.debug('UI refreshed');
   }
 }
 
