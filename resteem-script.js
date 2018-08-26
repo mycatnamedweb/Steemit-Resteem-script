@@ -450,7 +450,7 @@ const isRightWeightBtn = (weightBtn, link) => {
     if (!name) {
       console.debug(`name not found after "by" nor with ptc. Trying getting text from parent..`);
       // else try go up one parent
-      name = block.parentElement.innerText.split(' by ')[1].split(' (')[0];
+      name = block.parentElement.parentElement.innerText.split(' by ')[1].split(' (')[0];
     }
     console.debug(`The owner is ${name}`);
     const isRightWb = link.indexOf(name) !== -1;
