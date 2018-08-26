@@ -670,7 +670,6 @@ const start = () => {
   }
   localStorage.setItem('dailyScriptBot_result', '0');
   buildUI();
-  setInterval(() => errorsToShowOnUI.length && buildUI(), 60000); // 1 min
   setTimeout(() => processUsersComments(), 5000); // let the UI build first
   setInterval(() => processUsersComments(), CHECK_NEW_COMMENTS_EVERY_N_MILLISECONS);
 }
