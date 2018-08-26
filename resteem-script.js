@@ -555,7 +555,7 @@ async function execService(user = '', link) {
         resteemsCount++;
       }
     } else if (resteemOk && !confirmForm) {
-      errorsToShowOnUI.push(`${new Date()} -- Post Was already resteemed. User: ${user}`);
+      console.error(`${new Date()} -- Post Was already resteemed. User: ${user}`);
     } else {
       const msg = `FAILED? Grey Resteem for ${user} -> ${link}`;
       console.debug(msg);
