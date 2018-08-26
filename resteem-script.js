@@ -459,7 +459,7 @@ const isRightWeightBtn = (weightBtn, link) => {
     }
     console.debug(`The owner is ${name}`);
     const isRightWb = link.indexOf(name) !== -1;
-    if (!isRightWb) errorsToShowOnUI.push(`=====>>> It's not the right weight button. Not clicked! Link: ${link}`);
+    if (!isRightWb) errorsToShowOnUI.push(`=====>>> It's not the right weight button. Not clicked! Name found: ${name}. Link: ${link}`);
     return isRightWb;
   } catch (err) {
     const msg = `${new Date()} _ isRightWeightBtn -- ====>>> Err: ${err}. Link: ${link}. Block html: ${block.innerHTML}`;
@@ -508,13 +508,9 @@ async function execService(user = '', link) {
         upvoteBtn.click();
         await nap(3000);
         const weightBtn = w.document.querySelectorAll('a[class="confirm_weight"]')[0];
-        if (weightBtn) {
-          if (!isRightWeightBtn(weightBtn, link)) {
-            errorsToShowOnUI.push(`Weight button was not the post one for user ${user}. Not clicked.`);
-          } else {
-            weightBtn.click();
-            await nap(3000);
-          }
+        if (weightBtn && isRightWeightBtn(weightBtn, link)) {
+          weightBtn.click();
+          await nap(3000);
         }
       // }
       const dropdownArrow = w.document.getElementsByClassName('Icon dropdown-arrow')[0];
