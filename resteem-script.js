@@ -418,9 +418,11 @@ const isPostUpvoteBtn = (upvoteBtn, link) => {
       resteemerName = block.children[0].innerText.split('by ')[1].split(' (')[0];
     }
     console.debug(`Upvote button of user ${resteemerName}`);
-    return link.indexOf(resteemerName) !== -1;
+    const isPostUb = link.indexOf(resteemerName) !== -1;
+    if (!isPostUb) errorsToShowOnUI.push(`=====>> It's not post upvote button. Not clicked! Link: ${link}`);
+    return isPostUb;
   } catch (err) {
-    const msg = `${new Date()} _ isPostUpvoteBtn -- Err: ${err}`;
+    const msg = `${new Date()} _ isPostUpvoteBtn -- ===>> Err: ${err}`;
     console.error(msg);
     errorsToShowOnUI.push(msg);
     return false;
@@ -430,15 +432,32 @@ const isPostUpvoteBtn = (upvoteBtn, link) => {
 const isRightWeightBtn = (weightBtn, link) => {
   console.debug(`Checking weight btn ownership..`);
   let block;
+  let name;
   try {
     block = weightBtn.parentElement.parentElement.parentElement
       .parentElement.parentElement.parentElement.parentElement
       .parentElement.parentElement;
-    const name = block.innerText.split('by ')[1].split(' (')[0]
+    const nameArr = (block.innerText || '').split(' by ');
+    if (nameArr[1]) {
+      console.debug(`name found after "by "`);
+      name = nameArr[1].split(' (')[0];
+    } else {
+      console.debug(`name not found after "by ". Trying with class ptc..`);
+      // if html but no text -> class ptc and split ' ('[0]
+      const fromPtc = block.querySelectorAll('a[class="ptc"]')[0];
+      if (fromPtc) name = fromPtc.innerText.split(' (')[0];
+    }
+    if (!name) {
+      console.debug(`name not found after "by" nor with ptc. Trying getting text from parent..`);
+      // else try go up one parent
+      name = block.parentElement.innerText.split(' by ')[1].split(' (')[0];
+    }
     console.debug(`The owner is ${name}`);
-    return link.indexOf(name) !== -1;
+    const isRightWb = link.indexOf(name) !== -1;
+    if (!isRightWb) errorsToShowOnUI.push(`=====>>> It's not the right weight button. Not clicked! Link: ${link}`);
+    return isRightWb;
   } catch (err) {
-    const msg = `${new Date()} _ isRightWeightBtn -- Err: ${err}. Link: ${link}. Block html: ${block.innerHTML}`;
+    const msg = `${new Date()} _ isRightWeightBtn -- ====>>> Err: ${err}. Link: ${link}. Block html: ${block.innerHTML}`;
     console.error(msg);
     errorsToShowOnUI.push(msg);
     return false;
