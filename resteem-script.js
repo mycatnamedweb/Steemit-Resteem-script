@@ -462,7 +462,7 @@ const isRightWeightBtn = (weightBtn, link) => {
     if (!isRightWb) errorsToShowOnUI.push(`=====>>> It's not the right weight button. Not clicked! Name found: ${name}. Link: ${link}`);
     return isRightWb;
   } catch (err) {
-    const msg = `${new Date()} _ isRightWeightBtn -- ====>>> Err: ${err}. Link: ${link}. Block html: ${block.innerHTML}`;
+    const msg = `${new Date()} _ isRightWeightBtn -- ====>>> Err: ${err}. Link: ${link}. Block html: ${block.innerHTML.slice(-200)}`;
     console.error(msg);
     errorsToShowOnUI.push(msg);
     return false;
