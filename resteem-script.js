@@ -409,13 +409,13 @@ const isPostUpvoteBtn = (upvoteBtn, link) => {
   let block;
   try {
     block = upvoteBtn.parentElement.parentElement.parentElement.parentElement.parentElement;
-    if (block.children[0].innerText.split('by ').length === 1) {
+    if (block.children[0].textContent.split('by ').length === 1) {
       console.debug('branch1');
-      // resteemerName = block.parentElement.children[0].innerText.split('by ')[1].split(' (')[0];
+      // resteemerName = block.parentElement.children[0].textContent.split('by ')[1].split(' (')[0];
       resteemerName = block.parentElement.querySelectorAll('a[class="ptc"]')[0].href.split('/').pop();
     } else {
       console.debug('branch2');
-      resteemerName = block.children[0].innerText.split('by ')[1].split(' (')[0];
+      resteemerName = block.children[0].textContent.split('by ')[1].split(' (')[0];
     }
     console.debug(`Upvote button of user ${resteemerName}`);
     const isPostUb = link.indexOf(resteemerName) !== -1;
@@ -445,12 +445,12 @@ const isRightWeightBtn = (weightBtn, link) => {
       console.debug(`name not found after "by ". Trying with class ptc..`);
       // if html but no text -> class ptc and split ' ('[0]
       const fromPtc = block.parentElement.parentElement.querySelectorAll('a[class="ptc"]')[0];
-      if (fromPtc) name = fromPtc.innerText.split(' (')[0];
+      if (fromPtc) name = fromPtc.textContent.split(' (')[0];
     }
     if (!name) {
       console.debug(`name not found after "by" nor with ptc. Trying getting text from parent..`);
       // else try go up one parent
-      const splitted = block.parentElement.parentElement.innerText.split(' by ');
+      const splitted = block.parentElement.parentElement.textContent.split(' by ');
       if (splitted.length > 2) {
         errors.push(`Found more than one result for split by "by". Link: ${link}`);
         return false;
