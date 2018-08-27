@@ -439,10 +439,13 @@ const isRightWeightBtn = (weightBtn, link) => {
       .parentElement.parentElement.parentElement.parentElement
       .parentElement.parentElement;
     const nameArr = (block.innerText || '').split(' by ');
-    if (nameArr[1]) {
+    if (nameArr[1] && nameArr.length == 2) {
       console.debug(`name found after "by "`);
       name = nameArr[1].split(' (')[0];
     } else {
+      if (nameArr.length > 2) {
+        errors.push(`Found more than one result for split by "by". Link: ${link}`);
+      }
       console.debug(`name not found after "by ". Trying with class ptc..`);
       // if html but no text -> class ptc and split ' ('[0]
       const fromPtc = block.parentElement.parentElement.querySelectorAll('a[class="ptc"]')[0];
