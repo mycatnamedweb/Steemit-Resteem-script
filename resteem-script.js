@@ -444,7 +444,7 @@ const isRightWeightBtn = (weightBtn, link) => {
       name = nameArr[1].split(' (')[0];
     } else {
       if (nameArr.length > 2) {
-        errors.push(`Found more than one result for split by "by". Link: ${link}`);
+        errorsToShowOnUI.push(`Found more than one result for split by "by". Link: ${link}`);
       }
       console.debug(`name not found after "by ". Trying with class ptc..`);
       // if html but no text -> class ptc and split ' ('[0]
@@ -456,7 +456,7 @@ const isRightWeightBtn = (weightBtn, link) => {
       // else try go up one parent
       const splitted = block.parentElement.parentElement.textContent.split(' by ');
       if (splitted.length > 2) {
-        errors.push(`Found more than one result for split by "by". Link: ${link}`);
+        errorsToShowOnUI.push(`Found more than one result for split by "by". Link: ${link}`);
         return false;
       }
       name = splitted[1].split(' (')[0];
