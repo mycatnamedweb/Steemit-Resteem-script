@@ -313,9 +313,9 @@ async function readComments(k) {
 }
 
 async function replyToPost(k) {
-  if (NO_REPLY_TO_COMMENTERS || (users.length === 1 && toResteem[users[0]].indexOf('@') === -1)) {
+  if (NO_REPLY_TO_COMMENTERS || users.length === 1) {
     k();
-    return console.debug('No reply added.');
+    return console.debug('No reply added.'); // if one alone just wait for next one..
   }
   try {
     if (oldSeparatorDelBtn && DELETE_OLD_SEPARATOR_WHEN_NEW_COMMENTS) {
@@ -336,8 +336,9 @@ async function replyToPost(k) {
       let usersNoAlias = [];
       users.forEach((u) => {
         const cleaned = u.replace('~1','').replace('~2','');
-        if (usersNoAlias.indexOf(cleaned) === -1 && blacklist.indexOf(cleaned) === -1)
+        if (usersNoAlias.indexOf(cleaned) === -1 && blacklist.indexOf(cleaned) === -1 && toResteem[u].indexOf('@') !== -1) {
           usersNoAlias.push(cleaned);
+        }
       });
       if (usersNoAlias.length) myComment += `\n@${usersNoAlias.join(', @')}`;
     }
