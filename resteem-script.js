@@ -288,8 +288,8 @@ async function readComments(k) {
               const userAlias = `${user}${id > 0 ? `~${id}` : ''}`; // user, user~1, user~2
               const link = anchor.href;
               if (!added && toResteem[userAlias] == undefined
-                  && link.indexOf('@resteem.bot') == -1 && link.indexOf('@marcocasario') == -1 && link.indexOf('@rcr.bis') == -1
-                  && link.indexOf('/trending/') == -1 && link.indexOf('/byteball/') == -1 && link.indexOf('/created/') == -1) {
+                  && link.indexOf('@resteem.bot') == -1 && link.indexOf('resteem-bot-as') == -1 && link.indexOf('@rcr.bis') == -1
+                  && link.indexOf('/trending/') == -1 && link.indexOf('/byteball/') == -1 && link.indexOf('/created/') == -1 && link.indexOf('_RESTEEMS_LEFT_') === -1) {
                 toResteem[userAlias] = anchor.href;
                 added = true;
               }
