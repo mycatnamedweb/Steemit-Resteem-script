@@ -444,7 +444,7 @@ const isRightWeightBtn = (weightBtn, link) => {
     } else {
       console.debug(`name not found after "by ". Trying with class ptc..`);
       // if html but no text -> class ptc and split ' ('[0]
-      const fromPtc = block.querySelectorAll('a[class="ptc"]')[0];
+      const fromPtc = block.parentElement.parentElement.querySelectorAll('a[class="ptc"]')[0];
       if (fromPtc) name = fromPtc.innerText.split(' (')[0];
     }
     if (!name) {
@@ -462,7 +462,7 @@ const isRightWeightBtn = (weightBtn, link) => {
     if (!isRightWb) errorsToShowOnUI.push(`=====>>> It's not the right weight button. Not clicked! Name found: ${name}. Link: ${link}`);
     return isRightWb;
   } catch (err) {
-    const msg = `${new Date()} _ isRightWeightBtn -- ====>>> Err: ${err}. Link: ${link}. Block html: ${block.innerHTML.slice(-3000)}`;
+    const msg = `${new Date()} _ isRightWeightBtn -- ====>>> Err: ${err}. Link: ${link}. Block html: ${block.innerHTML}`;
     console.error(msg);
     errorsToShowOnUI.push(msg);
     return false;
