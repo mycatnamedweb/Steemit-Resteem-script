@@ -463,7 +463,7 @@ const isRightWeightBtn = (weightBtn, link) => {
     }
     console.debug(`The owner is ${name}`);
     const isRightWb = link.indexOf(name) !== -1;
-    if (!isRightWb) errorsToShowOnUI.push(`=====>>> It's not the right weight button. Not clicked! Name found: ${name}. Link: ${link}`);
+    if (!isRightWb) errorsToShowOnUI.push(`=====>>> It's not the right weight button. Not clicked! Name found: ${name}. Link: <a href="${link}" target="_blank">${link}</a>`);
     return isRightWb;
   } catch (err) {
     const msg = `${new Date()} _ isRightWeightBtn -- ====>>> Err: ${err}. Link: ${link}. Block html: ${block.innerHTML}`;
