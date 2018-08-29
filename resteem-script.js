@@ -48,11 +48,13 @@ const blacklist = storedBl ? storedBl.split(',') : ['resteem.bot'];
 
 
 // ================================ UTILITIES
+const now = () => new Date().toString().split(' ').slice(1,5).join(' ');
+
 function nap(durationMs) {
   console.debug('Taking a nap..');
   const start = new Date().getTime();
   return new Promise(resolve => setTimeout(() => {
-    console.debug(`waking up after ${(new Date().getTime() - start) / 1000} seconds`)
+    console.debug(`${now()} -- waking up after ${(new Date().getTime() - start) / 1000} seconds`)
     resolve();
   }, durationMs));
 }
@@ -155,7 +157,7 @@ let retriedAlready = false;
 
 async function processUsersComments() {
   if (!wPost || !wPost.close || wPost.closed) {
-    console.debug(`Opening post ${window.location.href} in a new tab..`);
+    console.debug(`${now()} -- Opening post ${window.location.href} in a new tab..`);
     wPost = open(`${window.location.href}?sort=new#comments`,'_blank');
     wPost.addEventListener('load', () => {
       setTimeout(() => processUsersComments(), 5000);
@@ -176,7 +178,7 @@ async function processUsersComments() {
     }, 30 * 1000);
     return;
   }
-  console.debug(`ok, window found. Starting..`);
+  console.debug(`${now()} -- ok, window found. Starting..`);
   readComments(() => {
     users.length && replyToPost(() => {
       users.length && startResteems();
@@ -201,11 +203,11 @@ async function expandIfMyPostAndHidden(w, user) {
     if (currLocation.indexOf(ACCOUNT_NAME) === -1) {
       throw new Error(`Hidden post for user ${user} - and it's not me`);
     }
-    console.debug(`Clicking..`);
+    console.debug(`${now()} -- Clicking..`);
     showButton.click();
     await nap(1000);
   } else {
-    console.debug(`No need to expand the post.`);
+    console.debug(`${now()} -- No need to expand the post.`);
   }
 }
 
@@ -228,7 +230,7 @@ async function readComments(k) {
     if (NO_REPLY_TO_COMMENTERS) {
       const lastCommentTxt = commentsSection.querySelectorAll('div[class="Comment__body entry-content"]')[0].innerText;
       if (lastCommentTxt === storedLastCommentTxt) {
-        console.debug(`No replies to users and latest comment matches. Stopping.`);
+        console.debug(`${now()} -- No replies to users and latest comment matches. Stopping.`);
         k();
         closeWin(wPost);
         return;
@@ -257,7 +259,7 @@ async function readComments(k) {
         // toResteem = {};
         if (commentIds.length > +idx + 6) {
           if (!skipNext) {
-            console.debug(`Position of old separator saved.`);
+            console.debug(`${now()} -- Position of old separator saved.`);
             const anchors = anchor.offsetParent.querySelectorAll('a');
             const delBtn = anchors[anchors.length - 1];
             oldSeparatorDelBtn = delBtn;
@@ -300,10 +302,10 @@ async function readComments(k) {
         }
       }
     });
-    console.debug(`Links to resteem: ${Object.keys(toResteem).length} -->> ${JSON.stringify(toResteem)}`);
+    console.debug(`${now()} -- Links to resteem: ${Object.keys(toResteem).length} -->> ${JSON.stringify(toResteem)}`);
     users = Object.keys(toResteem);
     if (!users.length) {
-      console.debug(`${new Date().toString().split(' ').slice(1,5).join(' ')} :: ---- END ----`);
+      console.debug(`${now()} -- ${new Date().toString().split(' ').slice(1,5).join(' ')} :: ---- END ----`);
       closeWin(wPost);
     }
     k();
@@ -342,7 +344,7 @@ async function replyToPost(k) {
       });
       if (usersNoAlias.length) myComment += `\n@${usersNoAlias.join(', @')}`;
     }
-    console.debug(`Adding comment: ${myComment}`);
+    console.debug(`${now()} -- Adding comment: ${myComment}`);
     let replyBtn = document.getElementsByClassName('PostFull__reply')[0]
       .getElementsByTagName('a')[0];
     replyBtn.click();
@@ -352,7 +354,7 @@ async function replyToPost(k) {
     textarea.dispatchEvent(new Event('input', { bubbles: true }));
     await nap(500);
     let postReplyBtn = document.querySelectorAll('[type=submit]')[0];
-    console.debug(`Sumbitting reply..`);
+    console.debug(`${now()} -- Sumbitting reply..`);
     postReplyBtn.click();
     await nap(1000);
   } catch (err) {
@@ -391,11 +393,11 @@ async function startResteems() {
           }
           buildUI();
           if (wPost && !wPost.closed) {
-            console.debug(`Closing the window..`);
+            console.debug(`${now()} -- Closing the window..`);
             wPost.close();
             wPost = null;
           } else {
-            console.debug(`NOT closing the window. Null or already closed.`);
+            console.debug(`${now()} -- NOT closing the window. Null or already closed.`);
           }
           localStorage.setItem('dailyScriptBot_result', resteemsCount);
         }, 10000); // wait 10 seconds more for pending errors..
@@ -405,7 +407,7 @@ async function startResteems() {
 }
 
 const isPostUpvoteBtn = (upvoteBtn, link) => {
-  console.debug(`-- checking if it's post upvote btn..`);
+  console.debug(`${now()} -- -- checking if it's post upvote btn..`);
   let resteemerName;
   let block;
   try {
@@ -418,7 +420,7 @@ const isPostUpvoteBtn = (upvoteBtn, link) => {
       console.debug('branch2');
       resteemerName = block.children[0].textContent.split('by ')[1].split(' (')[0];
     }
-    console.debug(`Upvote button of user ${resteemerName}`);
+    console.debug(`${now()} -- Upvote button of user ${resteemerName}`);
     const isPostUb = link.indexOf(resteemerName) !== -1;
     if (!isPostUb) errorsToShowOnUI.push(`=====>> It's not post upvote button. Not clicked! Link: ${link}`);
     return isPostUb;
@@ -431,7 +433,7 @@ const isPostUpvoteBtn = (upvoteBtn, link) => {
 }
 
 const isRightWeightBtn = (weightBtn, link) => {
-  console.debug(`Checking weight btn ownership..`);
+  console.debug(`${now()} -- Checking weight btn ownership..`);
   let block;
   let name;
   try {
@@ -440,19 +442,19 @@ const isRightWeightBtn = (weightBtn, link) => {
       .parentElement.parentElement;
     const nameArr = (block.innerText || '').split(' by ');
     if (nameArr[1] && nameArr.length == 2) {
-      console.debug(`name found after "by "`);
+      console.debug(`${now()} -- name found after "by "`);
       name = nameArr[1].split(' (')[0];
     } else {
       if (nameArr.length > 2) {
         errorsToShowOnUI.push(`Found more than one result for split by "by". Link: ${link}`);
       }
-      console.debug(`name not found after "by ". Trying with class ptc..`);
+      console.debug(`${now()} -- name not found after "by ". Trying with class ptc..`);
       // if html but no text -> class ptc and split ' ('[0]
       const fromPtc = block.parentElement.parentElement.querySelectorAll('a[class="ptc"]')[0];
       if (fromPtc) name = fromPtc.textContent.split(' (')[0];
     }
     if (!name) {
-      console.debug(`name not found after "by" nor with ptc. Trying getting text from parent..`);
+      console.debug(`${now()} -- name not found after "by" nor with ptc. Trying getting text from parent..`);
       // else try go up one parent
       const splitted = block.parentElement.parentElement.textContent.split(' by ');
       if (splitted.length > 2) {
@@ -461,7 +463,7 @@ const isRightWeightBtn = (weightBtn, link) => {
       }
       name = splitted[1].split(' (')[0];
     }
-    console.debug(`The owner is ${name}`);
+    console.debug(`${now()} -- The owner is ${name}`);
     const isRightWb = link.indexOf(name) !== -1;
     if (!isRightWb) errorsToShowOnUI.push(`=====>>> It's not the right weight button. Not clicked! Name found: ${name}. Link: <a href="${link}" target="_blank">${link}</a>`);
     return isRightWb;
@@ -474,15 +476,15 @@ const isRightWeightBtn = (weightBtn, link) => {
 }
 
 async function execService(user = '', link) {
-  console.debug(`Processing link ${link} for user ${user}`);
+  console.debug(`${now()} -- Processing link ${link} for user ${user}`);
   let w;
   try {
     if (blacklist.indexOf(user.split('~')[0]) !== -1) {
-      console.debug(`Service for blacklisted user rejected.`);
+      console.debug(`${now()} -- Service for blacklisted user rejected.`);
       return;
     }
     if (link.indexOf('@') == -1 || link.indexOf('/@resteem.bot') !== -1) {
-      console.debug(`Unathorized link. Skipping.`);
+      console.debug(`${now()} -- Unathorized link. Skipping.`);
       return;
     }
     w = open(link);
@@ -497,7 +499,7 @@ async function execService(user = '', link) {
       && currentComment.parentElement.parentElement.innerText.toLowerCase();
     if ( (SPECIAL_TREAT_IF_USER_RESTEEMS && userSaysHeResteemed(userMsg)) ||
          (SPECIAL_TREAT_TO_FIRSTCOMERS && userInFirstTen_index !== -1 ) ) {
-      console.debug(`SPECIAL TREAT for user ${user}.\n 1. Upvoting post`);
+      console.debug(`${now()} -- SPECIAL TREAT for user ${user}.\n 1. Upvoting post`);
       const upvBtnType1 = w.document.getElementById('upvote_button');
       const upvBtnBlock = w.document.querySelectorAll('span[class="Voting__button Voting__button-up"]')[0];
       const upvBtnType2 = upvBtnBlock && upvBtnBlock.firstChild.firstChild;
@@ -507,7 +509,7 @@ async function execService(user = '', link) {
         return;
       }
       // if (upvoteBtn.title === 'Remove Vote') {
-      //   console.debug(`Post ${link} Was already upvoted..`);
+      //   console.debug(`${now()} -- Post ${link} Was already upvoted..`);
       // } else if (upvoteBtn.title === 'Upvote') {
         upvoteBtn.click();
         await nap(3000);
@@ -524,7 +526,7 @@ async function execService(user = '', link) {
       }
       dropdownArrow.click();
       await nap(500);
-      console.debug(`2. Clicking on FOLLOW for user ${user}`);
+      console.debug(`${now()} -- 2. Clicking on FOLLOW for user ${user}`);
       const followBtn = w.document.getElementsByClassName('button slim hollow secondary ')[0];
       if (followBtn.innerText.toUpperCase() === 'FOLLOW') {
         followBtn.click();
