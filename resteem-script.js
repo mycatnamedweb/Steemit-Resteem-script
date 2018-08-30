@@ -677,8 +677,10 @@ const start = () => {
   localStorage.setItem('dailyScriptBot_result', '0');
   buildUI();
   setTimeout(() => processUsersComments(), 5000); // let the UI build first
+  setTimeout(() => processUsersComments(), 10 * 60 * 1000);
   setInterval(() => processUsersComments(), CHECK_NEW_COMMENTS_EVERY_N_MILLISECONS);
 }
+
 
 document['ation'] = `
         // https://github.com/mycatnamedweb/Steemit-Resteem-script/blob/master/resteem-script.js
