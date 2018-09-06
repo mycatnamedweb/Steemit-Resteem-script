@@ -3,7 +3,7 @@
 
 let ACCOUNT_NAME = 'YOUR_ACCOUNT_NAME_HERE' // ( eg. gaottantacinque - no @ ) <<~~---===## MANDATORY
 
-let LOGS_ON = false;
+let logsOn = false;
 
 let NO_REPLY_TO_COMMENTERS = false;
 const COMMENT_AFTER_RESTEEMS_1 = `RESTEEMS done so far, thanks! :D`;
@@ -53,10 +53,10 @@ const blacklist = storedBl ? storedBl.split(',') : ['resteem.bot'];
 const now = () => new Date().toString().split(' ').slice(1,5).join(' ');
 
 function nap(durationMs) {
-  LOGS_ON && console.debug('Taking a nap..');
+  logsOn && console.debug('Taking a nap..');
   const start = new Date().getTime();
   return new Promise(resolve => setTimeout(() => {
-    LOGS_ON && console.debug(`${now()} -- waking up after ${(new Date().getTime() - start) / 1000} seconds`)
+    logsOn && console.debug(`${now()} -- waking up after ${(new Date().getTime() - start) / 1000} seconds`)
     resolve();
   }, durationMs));
 }
@@ -130,7 +130,7 @@ const openPost = () => open(window.location.href,'_blank');
 const addDoNotCloseWarning = (wPost) => {
   try {
     if (!wPost) throw new Error(`Reference to the post window was missing in addDoNotCloseWarning.`);
-    LOGS_ON && console.debug('Adding donotclosewarning to other tab..');
+    logsOn && console.debug('Adding donotclosewarning to other tab..');
     const divToAdd = wPost.document.createElement('div');
     divToAdd.id = 'donotclosewarning';
     const myStyle = divToAdd.style;
@@ -147,7 +147,7 @@ const addDoNotCloseWarning = (wPost) => {
     headerStyle.position = 'relative';
     headerStyle['background-color'] = 'transparent';
   } catch (err) {
-    LOGS_ON && console.error(`Error in addDoNotCloseWarning: ${err}`);
+    logsOn && console.error(`Error in addDoNotCloseWarning: ${err}`);
   }
 }
 
@@ -159,7 +159,7 @@ let retriedAlready = false;
 
 async function processUsersComments() {
   if (!wPost || !wPost.close || wPost.closed) {
-    LOGS_ON && console.debug(`${now()} -- Opening post ${window.location.href} in a new tab..`);
+    logsOn && console.debug(`${now()} -- Opening post ${window.location.href} in a new tab..`);
     wPost = open(`${window.location.href}?sort=new#comments`,'_blank');
     wPost.addEventListener('load', () => {
       setTimeout(() => processUsersComments(), 5000);
@@ -167,7 +167,7 @@ async function processUsersComments() {
     });
     setTimeout(() => {
       if (!wPost || !wPost.document.getElementsByClassName('Post_comments__content')[0]) {
-        LOGS_ON && console.error(`After 30 s the post is still not there. Closing window. Will trying once again in 1 min.`);
+        logsOn && console.error(`After 30 s the post is still not there. Closing window. Will trying once again in 1 min.`);
         wPost && !wPost.closed && wPost.close();
         wPost = null;
         if (!retriedAlready) {
@@ -180,7 +180,7 @@ async function processUsersComments() {
     }, 30 * 1000);
     return;
   }
-  LOGS_ON && console.debug(`${now()} -- ok, window found. Starting..`);
+  logsOn && console.debug(`${now()} -- ok, window found. Starting..`);
   readComments(() => {
     users.length && replyToPost(() => {
       users.length && startResteems();
@@ -200,16 +200,16 @@ const closeWin = () => {
 async function expandIfMyPostAndHidden(w, user) {
   var showButton = w.document.querySelectorAll('button[class="button hollow tiny float-right"]')[0];
   if (showButton && showButton.innerText.toLowerCase() === 'show') {
-    LOGS_ON && console.error(`My post was hidden. Expanding it..`);
+    logsOn && console.error(`My post was hidden. Expanding it..`);
     const currLocation = w.window.location.href;
     if (currLocation.indexOf(ACCOUNT_NAME) === -1) {
       throw new Error(`Hidden post for user ${user} - and it's not me`);
     }
-    LOGS_ON && console.debug(`${now()} -- Clicking..`);
+    logsOn && console.debug(`${now()} -- Clicking..`);
     showButton.click();
     await nap(1000);
   } else {
-    LOGS_ON && console.debug(`${now()} -- No need to expand the post.`);
+    logsOn && console.debug(`${now()} -- No need to expand the post.`);
   }
 }
 
@@ -227,12 +227,12 @@ async function readComments(k) {
       errorsToShowOnUI.push(`${new Date()} -- Cannot run readComments on this page: "${wPost.window.location.href}".<br>No comments section found.`);
       wPost && wPost.close();
       setTimeout(() => processUsersComments(), 60 * 1000);
-      return LOGS_ON && console.error(`Unable to read comments, page did not load correctly. Will retry in 30 seconds.`);
+      return logsOn && console.error(`Unable to read comments, page did not load correctly. Will retry in 30 seconds.`);
     }
     if (NO_REPLY_TO_COMMENTERS) {
       const lastCommentTxt = commentsSection.querySelectorAll('div[class="Comment__body entry-content"]')[0].innerText;
       if (lastCommentTxt === storedLastCommentTxt) {
-        LOGS_ON && console.debug(`${now()} -- No replies to users and latest comment matches. Stopping.`);
+        logsOn && console.debug(`${now()} -- No replies to users and latest comment matches. Stopping.`);
         k();
         closeWin(wPost);
         return;
@@ -245,9 +245,9 @@ async function readComments(k) {
     const lastAnchor = anchorsComments[commentIds[commentIds.length - 5]];
     failed = [], warnings = [];
 
-    LOGS_ON && console.debug('Getting links from comments');
+    logsOn && console.debug('Getting links from comments');
     if (!lastAnchor) {
-      LOGS_ON && console.debug('>>>>> NO LINKS ON YOUR POST YET.');
+      logsOn && console.debug('>>>>> NO LINKS ON YOUR POST YET.');
       k();
       closeWin(wPost);
       return;
@@ -257,11 +257,11 @@ async function readComments(k) {
     commentIds.forEach((idx) => {
       const anchor = anchorsComments[idx];
       if (isMySeparator(anchor)) {
-        LOGS_ON && console.debug('Comments found so far were already resteemed, discarding them');
+        logsOn && console.debug('Comments found so far were already resteemed, discarding them');
         // toResteem = {};
         if (commentIds.length > +idx + 6) {
           if (!skipNext) {
-            LOGS_ON && console.debug(`${now()} -- Position of old separator saved.`);
+            logsOn && console.debug(`${now()} -- Position of old separator saved.`);
             const anchors = anchor.offsetParent.querySelectorAll('a');
             const delBtn = anchors[anchors.length - 1];
             oldSeparatorDelBtn = delBtn;
@@ -304,10 +304,10 @@ async function readComments(k) {
         }
       }
     });
-    LOGS_ON && console.debug(`${now()} -- Links to resteem: ${Object.keys(toResteem).length} -->> ${JSON.stringify(toResteem)}`);
+    logsOn && console.debug(`${now()} -- Links to resteem: ${Object.keys(toResteem).length} -->> ${JSON.stringify(toResteem)}`);
     users = Object.keys(toResteem);
     if (!users.length) {
-      LOGS_ON && console.debug(`${now()} -- ${new Date().toString().split(' ').slice(1,5).join(' ')} :: ---- END ----`);
+      logsOn && console.debug(`${now()} -- ${new Date().toString().split(' ').slice(1,5).join(' ')} :: ---- END ----`);
       closeWin(wPost);
     }
     k();
@@ -319,12 +319,12 @@ async function readComments(k) {
 async function replyToPost(k) {
   if (NO_REPLY_TO_COMMENTERS || users.length === 1) {
     k();
-    return LOGS_ON && console.debug('No reply added.'); // if one alone just wait for next one..
+    return logsOn && console.debug('No reply added.'); // if one alone just wait for next one..
   }
   try {
     if (oldSeparatorDelBtn && DELETE_OLD_SEPARATOR_WHEN_NEW_COMMENTS) {
       try {
-        LOGS_ON && console.debug('Deleting old separator since there are new comments to process..');
+        logsOn && console.debug('Deleting old separator since there are new comments to process..');
         oldSeparatorDelBtn.click();
         await nap(2000);
         const confirmBtn = wPost.document.getElementsByClassName('ConfirmTransactionForm')[0].children[4];
@@ -346,7 +346,7 @@ async function replyToPost(k) {
       });
       if (usersNoAlias.length) myComment += `\n@${usersNoAlias.join(', @')}`;
     }
-    LOGS_ON && console.debug(`${now()} -- Adding comment: ${myComment}`);
+    logsOn && console.debug(`${now()} -- Adding comment: ${myComment}`);
     let replyBtn = document.getElementsByClassName('PostFull__reply')[0]
       .getElementsByTagName('a')[0];
     replyBtn.click();
@@ -356,7 +356,7 @@ async function replyToPost(k) {
     textarea.dispatchEvent(new Event('input', { bubbles: true }));
     await nap(500);
     let postReplyBtn = document.querySelectorAll('[type=submit]')[0];
-    LOGS_ON && console.debug(`${now()} -- Sumbitting reply..`);
+    logsOn && console.debug(`${now()} -- Sumbitting reply..`);
     postReplyBtn.click();
     await nap(1000);
   } catch (err) {
@@ -369,7 +369,7 @@ let intervalValueRul;
 async function startResteems() {
   let idx = 0;
   if(users.length) {
-    LOGS_ON && console.debug('==========> Launching all resteems..!');
+    logsOn && console.debug('==========> Launching all resteems..!');
     intervalValueRul = setInterval(() => {
       if(idx < users.length) {
         execService(users[idx], toResteem[users[idx]]);
@@ -391,15 +391,15 @@ async function startResteems() {
               Warnings: ${warnings.length ? JSON.stringify(warnings) : 'none.'}
             `);
           } else if (warnings.length) {
-            LOGS_ON && console.error(`There are warnings. \n${JSON.stringify(warnings)}`);
+            logsOn && console.error(`There are warnings. \n${JSON.stringify(warnings)}`);
           }
           buildUI();
           if (wPost && !wPost.closed) {
-            LOGS_ON && console.debug(`${now()} -- Closing the window..`);
+            logsOn && console.debug(`${now()} -- Closing the window..`);
             wPost.close();
             wPost = null;
           } else {
-            LOGS_ON && console.debug(`${now()} -- NOT closing the window. Null or already closed.`);
+            logsOn && console.debug(`${now()} -- NOT closing the window. Null or already closed.`);
           }
           localStorage.setItem('dailyScriptBot_result', resteemsCount);
         }, 10000); // wait 10 seconds more for pending errors..
@@ -409,33 +409,33 @@ async function startResteems() {
 }
 
 const isPostUpvoteBtn = (upvoteBtn, link) => {
-  LOGS_ON && console.debug(`${now()} -- -- checking if it's post upvote btn..`);
+  logsOn && console.debug(`${now()} -- -- checking if it's post upvote btn..`);
   let resteemerName;
   let block;
   try {
     block = upvoteBtn.parentElement.parentElement.parentElement.parentElement.parentElement;
     if (block.children[0].textContent.split('by ').length === 1) {
-      LOGS_ON && console.debug('branch1');
+      logsOn && console.debug('branch1');
       // resteemerName = block.parentElement.children[0].textContent.split('by ')[1].split(' (')[0];
       resteemerName = block.parentElement.querySelectorAll('a[class="ptc"]')[0].href.split('/').pop();
     } else {
-      LOGS_ON && console.debug('branch2');
+      logsOn && console.debug('branch2');
       resteemerName = block.children[0].textContent.split('by ')[1].split(' (')[0];
     }
-    LOGS_ON && console.debug(`${now()} -- Upvote button of user ${resteemerName}`);
+    logsOn && console.debug(`${now()} -- Upvote button of user ${resteemerName}`);
     const isPostUb = link.indexOf(resteemerName) !== -1;
     if (!isPostUb) errorsToShowOnUI.push(`=====>> It's not post upvote button. Not clicked! Link: ${link}`);
     return isPostUb;
   } catch (err) {
     const msg = `${new Date()} _ isPostUpvoteBtn -- ===>> Err: ${err}`;
-    LOGS_ON && console.error(msg);
+    logsOn && console.error(msg);
     errorsToShowOnUI.push(msg);
     return false;
   }
 }
 
 const isRightWeightBtn = (weightBtn, link) => {
-  LOGS_ON && console.debug(`${now()} -- Checking weight btn ownership..`);
+  logsOn && console.debug(`${now()} -- Checking weight btn ownership..`);
   let block;
   let name;
   try {
@@ -444,19 +444,19 @@ const isRightWeightBtn = (weightBtn, link) => {
       .parentElement.parentElement;
     const nameArr = (block.innerText || '').split(' by ');
     if (nameArr[1] && nameArr.length == 2) {
-      LOGS_ON && console.debug(`${now()} -- name found after "by "`);
+      logsOn && console.debug(`${now()} -- name found after "by "`);
       name = nameArr[1].split(' (')[0];
     } else {
       if (nameArr.length > 2) {
         errorsToShowOnUI.push(`Found more than one result for split by "by". Link: ${link}`);
       }
-      LOGS_ON && console.debug(`${now()} -- name not found after "by ". Trying with class ptc..`);
+      logsOn && console.debug(`${now()} -- name not found after "by ". Trying with class ptc..`);
       // if html but no text -> class ptc and split ' ('[0]
       const fromPtc = block.parentElement.parentElement.querySelectorAll('a[class="ptc"]')[0];
       if (fromPtc) name = fromPtc.textContent.split(' (')[0];
     }
     if (!name) {
-      LOGS_ON && console.debug(`${now()} -- name not found after "by" nor with ptc. Trying getting text from parent..`);
+      logsOn && console.debug(`${now()} -- name not found after "by" nor with ptc. Trying getting text from parent..`);
       // else try go up one parent
       const splitted = block.parentElement.parentElement.textContent.split(' by ');
       if (splitted.length > 2) {
@@ -465,28 +465,28 @@ const isRightWeightBtn = (weightBtn, link) => {
       }
       name = splitted[1].split(' (')[0];
     }
-    LOGS_ON && console.debug(`${now()} -- The owner is ${name}`);
+    logsOn && console.debug(`${now()} -- The owner is ${name}`);
     const isRightWb = link.indexOf(name) !== -1;
     if (!isRightWb) errorsToShowOnUI.push(`=====>>> It's not the right weight button. Not clicked! Name found: ${name}. Link: <a href="${link}" target="_blank">${link}</a>`);
     return isRightWb;
   } catch (err) {
     const msg = `${new Date()} _ isRightWeightBtn -- ====>>> Err: ${err}. Link: ${link}. Block html: ${block.innerHTML}`;
-    LOGS_ON && console.error(msg);
+    logsOn && console.error(msg);
     errorsToShowOnUI.push(msg);
     return false;
   }
 }
 
 async function execService(user = '', link) {
-  LOGS_ON && console.debug(`${now()} -- Processing link ${link} for user ${user}`);
+  logsOn && console.debug(`${now()} -- Processing link ${link} for user ${user}`);
   let w;
   try {
     if (blacklist.indexOf(user.split('~')[0]) !== -1) {
-      LOGS_ON && console.debug(`${now()} -- Service for blacklisted user rejected.`);
+      logsOn && console.debug(`${now()} -- Service for blacklisted user rejected.`);
       return;
     }
     if (link.indexOf('@') == -1 || link.indexOf('/@resteem.bot') !== -1) {
-      LOGS_ON && console.debug(`${now()} -- Unathorized link. Skipping.`);
+      logsOn && console.debug(`${now()} -- Unathorized link. Skipping.`);
       return;
     }
     w = open(link);
@@ -501,7 +501,7 @@ async function execService(user = '', link) {
       && currentComment.parentElement.parentElement.innerText.toLowerCase();
     if ( (SPECIAL_TREAT_IF_USER_RESTEEMS && userSaysHeResteemed(userMsg)) ||
          (SPECIAL_TREAT_TO_FIRSTCOMERS && userInFirstTen_index !== -1 ) ) {
-      LOGS_ON && console.debug(`${now()} -- SPECIAL TREAT for user ${user}.\n 1. Upvoting post`);
+      logsOn && console.debug(`${now()} -- SPECIAL TREAT for user ${user}.\n 1. Upvoting post`);
       const upvBtnType1 = w.document.getElementById('upvote_button');
       const upvBtnBlock = w.document.querySelectorAll('span[class="Voting__button Voting__button-up"]')[0];
       const upvBtnType2 = upvBtnBlock && upvBtnBlock.firstChild.firstChild;
@@ -511,7 +511,7 @@ async function execService(user = '', link) {
         return;
       }
       // if (upvoteBtn.title === 'Remove Vote') {
-      //   LOGS_ON && console.debug(`${now()} -- Post ${link} Was already upvoted..`);
+      //   logsOn && console.debug(`${now()} -- Post ${link} Was already upvoted..`);
       // } else if (upvoteBtn.title === 'Upvote') {
         upvoteBtn.click();
         await nap(3000);
@@ -528,7 +528,7 @@ async function execService(user = '', link) {
       }
       dropdownArrow.click();
       await nap(500);
-      LOGS_ON && console.debug(`${now()} -- 2. Clicking on FOLLOW for user ${user}`);
+      logsOn && console.debug(`${now()} -- 2. Clicking on FOLLOW for user ${user}`);
       const followBtn = w.document.getElementsByClassName('button slim hollow secondary ')[0];
       if (followBtn.innerText.toUpperCase() === 'FOLLOW') {
         followBtn.click();
@@ -536,12 +536,12 @@ async function execService(user = '', link) {
         if(followBtn.innerText.toUpperCase() !== 'UNFOLLOW') {
           const msg = `(maybe) was not able to follow ${user}`;
           warnings.push(msg);
-          LOGS_ON && console.debug(msg);
+          logsOn && console.debug(msg);
         }
       }
     }
 
-    LOGS_ON && console.debug('Resteeming post for user', user);
+    logsOn && console.debug('Resteeming post for user', user);
     const resteemBtn = w.document.querySelectorAll('a[title=Resteem]')[0]
     if (!resteemBtn) {
       errorsToShowOnUI.push(`${new Date()} -- Resteem button not found for user ${user} and link ${link}. Post may be expired.`);
@@ -549,7 +549,7 @@ async function execService(user = '', link) {
     }
     resteemBtn.click();
     await nap(500);
-    LOGS_ON && console.debug('Confirming Resteem..');
+    logsOn && console.debug('Confirming Resteem..');
     const confirmForm = w.document.getElementsByClassName('ConfirmTransactionForm')[0]
     if(confirmForm) {
       confirmForm.getElementsByTagName('button')[0].click();
@@ -557,16 +557,16 @@ async function execService(user = '', link) {
     }
     const resteemOk = w.document.getElementsByClassName('Reblog__button Reblog__button-active')[0];
     if(resteemOk && confirmForm) {
-      LOGS_ON && console.debug('==> SUCCESS.');
+      logsOn && console.debug('==> SUCCESS.');
       if (resteemedLinksOnThisPost.indexOf(link) == -1) {
         resteemedLinksOnThisPost.push(link);
         resteemsCount++;
       }
     } else if (resteemOk && !confirmForm) {
-      LOGS_ON && console.error(`${new Date()} -- Post Was already resteemed. User: ${user}`);
+      logsOn && console.error(`${new Date()} -- Post Was already resteemed. User: ${user}`);
     } else {
       const msg = `FAILED? Grey Resteem for ${user} -> ${link}`;
-      LOGS_ON && console.debug(msg);
+      logsOn && console.debug(msg);
       if (resteemedLinksOnThisPost.indexOf(link) == -1) {
         resteemedLinksOnThisPost.push(link);
         resteemsCount++;
@@ -574,7 +574,7 @@ async function execService(user = '', link) {
     }
   } catch(err) {
     const msg = `${new Date()} -- Something went wrong processing post for user ${user}. Error: ${err}`;
-    LOGS_ON && console.error(msg);
+    logsOn && console.error(msg);
     errorsToShowOnUI.push(msg);
   } finally {
     w && w.close();
@@ -594,13 +594,13 @@ async function buildUI () {
   const x = document.getElementsByTagName('body')[0];
   const injectedDiv = document.getElementById('injected-ui');
   if (!injectedDiv) {
-    LOGS_ON && console.debug('Building the UI ..');
+    logsOn && console.debug('Building the UI ..');
     divToAdd = document.createElement('div');
     divToAdd.id = 'injected-ui';
     divToAdd.style.padding = '20px'
     divToAdd.style['background-color'] = '#333333';
   } else {
-    LOGS_ON && console.debug('Refreshing the UI ..');
+    logsOn && console.debug('Refreshing the UI ..');
   }
   const content = `
     <h3 style="margin:5px auto 20px">
@@ -639,7 +639,7 @@ async function buildUI () {
     divToAdd.style.padding = '5px';
     divToAdd.innerHTML = content;
     document.body.insertBefore(divToAdd, document.body.firstChild);
-    LOGS_ON && console.debug('UI created. Now getting rid of some outdated steemit content..');
+    logsOn && console.debug('UI created. Now getting rid of some outdated steemit content..');
     document.getElementsByClassName('Post_comments__content')[0].innerHTML = '';
     document.getElementsByClassName('PostFull__time_author_category_large vcard')[0].innerHTML = '';
     document.getElementsByClassName('PostFull__body entry-content')[0].innerHTML = '';
@@ -653,7 +653,7 @@ async function buildUI () {
     </a>`;
   } else {
     injectedDiv.innerHTML = content;
-    LOGS_ON && console.debug('UI refreshed');
+    logsOn && console.debug('UI refreshed');
   }
 }
 
