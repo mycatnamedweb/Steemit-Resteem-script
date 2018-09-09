@@ -293,7 +293,7 @@ async function readComments(k) {
               const link = anchor.href;
               if (!added && toResteem[userAlias] == undefined
                   && link.indexOf('@resteem.bot') == -1 && link.indexOf('resteem-bot-as') == -1 && link.indexOf('@rcr.bis') == -1
-                  && link.indexOf('/trending/') == -1 && link.indexOf('/byteball/') == -1 && link.indexOf('/created/') == -1 && link.indexOf('_RESTEEMS_LEFT_') === -1) {
+                  && link.indexOf('/trending/') == -1 && link.indexOf('/byteball/') == -1 && link.indexOf('/created/') == -1 && link.indexOf('RESTEEMS_LEFT') === -1) {
                 toResteem[userAlias] = anchor.href;
                 added = true;
               }
@@ -466,7 +466,7 @@ const isRightWeightBtn = (weightBtn, link) => {
       name = splitted[1].split(' (')[0];
     }
     logsOn && console.debug(`${now()} -- The owner is ${name}`);
-    const isRightWb = link.indexOf(name) !== -1;
+    const isRightWb = link.indexOf(`@${name.replace('@','')}`) !== -1;
     if (!isRightWb) errorsToShowOnUI.push(`=====>>> It's not the right weight button. Not clicked! Name found: ${name}. Link: <a href="${link}" target="_blank">${link}</a>`);
     return isRightWb;
   } catch (err) {
