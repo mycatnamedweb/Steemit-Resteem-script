@@ -424,7 +424,7 @@ const isPostUpvoteBtn = (upvoteBtn, link) => {
     }
     logsOn && console.debug(`${now()} -- Upvote button of user ${resteemerName}`);
     const isPostUb = link.indexOf(resteemerName) !== -1;
-    if (!isPostUb) errorsToShowOnUI.push(`=====>> It's not post upvote button. Not clicked! Link: ${link}`);
+    if (!isPostUb) errorsToShowOnUI.push(`(should be ok) >> It's not post upvote button. Not clicked! Link: ${link}`);
     return isPostUb;
   } catch (err) {
     const msg = `${new Date()} _ isPostUpvoteBtn -- ===>> Err: ${err}`;
