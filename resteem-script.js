@@ -8,7 +8,7 @@ let logsOn = false;
 let NO_REPLY_TO_COMMENTERS = false;
 const COMMENT_AFTER_RESTEEMS_1 = `RESTEEMS done so far, thanks! :D`;
 const COMMENT_AFTER_RESTEEMS_2 = `RESTEEM done! Thanks for using my free resteem service! :)`;
-const COMMENT_AFTER_RESTEEMS_3 = `All RESTEEMS done until here`
+const COMMENT_AFTER_RESTEEMS_3 = `All RESTEEMS done until here, thanks!`
 const EACH_BROWSER_DIFFERENT_COMMENT = true;
 const MENTION_USERS_IN_SEPARATORS = true;
 const DELETE_OLD_SEPARATOR_WHEN_NEW_COMMENTS = false;
@@ -22,7 +22,7 @@ const SPECIAL_TREAT_IF_USER_RESTEEMS = true;
 const KEYWORD_IN_COMMENT_TO_GET_UPVOTE_AND_FOLLOW_1 = 'resteemed';
 const KEYWORD_IN_COMMENT_TO_GET_UPVOTE_AND_FOLLOW_2 = 're-steemed';
 const KEYWORD_IN_COMMENT_TO_GET_UPVOTE_AND_FOLLOW_3 = 'resteemd';
-const KEYWORD_IN_COMMENT_TO_GET_UPVOTE_AND_FOLLOW_4 = '~#_ADD (lowercase) KEYWORD HERE IF NEEDED_#~';
+const KEYWORD_IN_COMMENT_TO_GET_UPVOTE_AND_FOLLOW_4 = 'reblogged'; // change (lowercase) keywords here if needed
 
 const CHECK_NEW_COMMENTS_EVERY_N_MILLISECONS = 30 * 60 * 1000;  // 30 or 60 mins
 const OPEN_USER_LINK_TO_RESTEEM_EVERY_N_MILLISECONDS = 13 * 1000; // 13 seconds
@@ -319,7 +319,7 @@ async function readComments(k) {
 async function replyToPost(k) {
   if (NO_REPLY_TO_COMMENTERS || users.length === 1) {
     k();
-    return logsOn && console.debug('No reply added.'); // if one alone just wait for next one..
+    return logsOn && console.debug('No reply added. Set up to do so or not enough users to mention.'); // if one alone just wait for next one..
   }
   try {
     if (oldSeparatorDelBtn && DELETE_OLD_SEPARATOR_WHEN_NEW_COMMENTS) {
@@ -335,7 +335,7 @@ async function replyToPost(k) {
       }
     }
     oldSeparatorDelBtn = null;
-    let myComment = getComment(users.length === 1);
+    let myComment = getComment(users.length === 1); // actually never, see first line of function
     if (MENTION_USERS_IN_SEPARATORS) {
       let usersNoAlias = [];
       users.forEach((u) => {
