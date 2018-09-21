@@ -317,7 +317,7 @@ async function readComments(k) {
 }
 
 async function replyToPost(k) {
-  if (NO_REPLY_TO_COMMENTERS || users.length === 1) {
+  if (NO_REPLY_TO_COMMENTERS ||  (resteemsCount > 3 && users.length === 1) || (resteemsCount > 5 && users.length < 3)) { // one single mention ok at first. Later on group at least 3 mentions.
     k();
     return logsOn && console.debug('No reply added. Set up to do so or not enough users to mention.'); // if one alone just wait for next one..
   }
