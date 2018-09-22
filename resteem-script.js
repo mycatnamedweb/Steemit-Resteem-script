@@ -24,7 +24,7 @@ const KEYWORD_IN_COMMENT_TO_GET_UPVOTE_AND_FOLLOW_2 = 're-steemed';
 const KEYWORD_IN_COMMENT_TO_GET_UPVOTE_AND_FOLLOW_3 = 'resteemd';
 const KEYWORD_IN_COMMENT_TO_GET_UPVOTE_AND_FOLLOW_4 = 'reblogged'; // change (lowercase) keywords here if needed
 
-const CHECK_NEW_COMMENTS_EVERY_N_MILLISECONS = 30 * 60 * 1000;  // 30 or 60 mins
+const CHECK_NEW_COMMENTS_EVERY_N_MILLISECONS = 30 * 60 * 1000;  // 30  mins
 const OPEN_USER_LINK_TO_RESTEEM_EVERY_N_MILLISECONDS = 13 * 1000; // 13 seconds
 
 // CHANGE THESE ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
