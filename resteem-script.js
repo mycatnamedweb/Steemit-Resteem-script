@@ -1,3 +1,5 @@
+// >>>>>>>>> STEEMIT UI this code relies on: https://github.com/steemit/condenser
+
 // =========================================================================
 // CHANGE THESE vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
@@ -22,7 +24,7 @@ const SPECIAL_TREAT_IF_USER_RESTEEMS = true;
 const KEYWORD_IN_COMMENT_TO_GET_UPVOTE_AND_FOLLOW_1 = 'resteemed';
 const KEYWORD_IN_COMMENT_TO_GET_UPVOTE_AND_FOLLOW_2 = 're-steemed';
 const KEYWORD_IN_COMMENT_TO_GET_UPVOTE_AND_FOLLOW_3 = 'resteemd';
-const KEYWORD_IN_COMMENT_TO_GET_UPVOTE_AND_FOLLOW_4 = 'reblogged'; // change (lowercase) keywords here if needed
+const KEYWORD_IN_COMMENT_TO_GET_UPVOTE_AND_FOLLOW_4 = 'resteem done'; // change (lowercase) keywords here if needed
 
 const CHECK_NEW_COMMENTS_EVERY_N_MILLISECONS = 30 * 60 * 1000;  // 30  mins
 const OPEN_USER_LINK_TO_RESTEEM_EVERY_N_MILLISECONDS = 13 * 1000; // 13 seconds
@@ -317,7 +319,7 @@ async function readComments(k) {
 }
 
 async function replyToPost(k) {
-  if (NO_REPLY_TO_COMMENTERS || (resteemsCount > 0 && resteemsCount <= 5 && users.length === 1) || (resteemsCount > 5 && users.length < 3)) { // one single mention ok at first. Later on group at least 3 mentions.
+  if (NO_REPLY_TO_COMMENTERS || (resteemsCount <= 5 && users.length < 2) || (resteemsCount > 5 && users.length < 3)) { // skip comment if only one resteem, after 5 resteems at least 3 users
     k();
     return logsOn && console.debug('No reply added. Set up to do so or not enough users to mention.'); // if one alone just wait for next one..
   }
