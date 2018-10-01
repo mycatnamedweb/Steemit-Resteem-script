@@ -45,7 +45,7 @@ let failed = [], warnings = [];
 let errorsToShowOnUI = [];
 let resteemsCount = 0;
 const resteemedLinksOnThisPost = [];
-// const upvotedStore = {};
+let lastRun = '';
 
 const storedBl = localStorage.getItem('blacklist-rs');
 const blacklist = storedBl ? storedBl.split(',') : ['resteem.bot'];
@@ -395,6 +395,7 @@ async function startResteems() {
           } else if (warnings.length) {
             logsOn && console.error(`There are warnings. \n${JSON.stringify(warnings)}`);
           }
+          lastRun = now().split(' ').pop();
           buildUI();
           if (wPost && !wPost.closed) {
             logsOn && console.debug(`${now()} -- Closing the window..`);
@@ -615,6 +616,9 @@ async function buildUI () {
     <h5 style="color:#fcfcfc">RESTEEM SERVICE STATUS:</h5>
     <div style="float:right;padding:5px;border:thin solid grey;margin-left:10px;color:#fcfcfc">
       Resteemed: ${resteemsCount}
+      <br>
+      <sub>Last run:
+      &nbsp; ${lastRun}</sub>
     </div>
     <div style="max-height:600px;border:thin solid grey;overflow:auto;padding:15px">
       ${errorsToShowOnUI.length ?
