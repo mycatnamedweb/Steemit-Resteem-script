@@ -106,7 +106,7 @@ const getId = (brs = '') => {
       return 0;
     case 'O':
       return 1;
-    case 'E': default:
+    case 'C': default:
       return 2;
   }
 }
