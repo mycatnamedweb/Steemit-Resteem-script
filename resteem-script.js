@@ -96,9 +96,7 @@ const userSaysHeResteemed = (userMsg = '') => {
 }
 
 const extractUA = () => {
-  const usagArr = navigator.userAgent.split(' ');
-  const ua = usagArr.pop().split('/')[0].toLowerCase();
-  if (usagArr.indexOf('Chrome/71.0.3567.0') !== -1) return 'edge';
+  const ua = navigator.userAgent.split(' ').pop().split('/')[0].toLowerCase();
   return ua === 'safari' ? 'chrome' : ua;
 }
 
