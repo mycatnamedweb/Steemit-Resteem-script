@@ -215,6 +215,8 @@ async function expandIfMyPostAndHidden(w, user) {
   }
 }
 
+let storedComment = '';
+
 async function readComments(k) {
   try {
     oldSeparatorDelBtn = null;
@@ -354,6 +356,8 @@ async function replyToPost(k) {
     replyBtn.click();
     await nap(500);
     let textarea = document.getElementsByTagName('textarea')[0];
+    if (myComment == storedComment) throw new Error(`Was going to add an identical comment...!`);
+    storedComment = myComment;
     setNativeValue(textarea, myComment);
     textarea.dispatchEvent(new Event('input', { bubbles: true }));
     await nap(500);
