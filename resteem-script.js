@@ -15,7 +15,7 @@ const EACH_BROWSER_DIFFERENT_COMMENT = true;
 const MENTION_USERS_IN_SEPARATORS = true;
 const DELETE_OLD_SEPARATOR_WHEN_NEW_COMMENTS = false;
 
-let MAX_LINKS_PER_USER = 3;
+let MAX_LINKS_PER_USER = 1;
 
 let SPECIAL_TREAT_TO_FIRSTCOMERS = true;
 let HOW_MANY_FIRSTCOMERS = 10;
@@ -28,6 +28,10 @@ const KEYWORD_IN_COMMENT_TO_GET_UPVOTE_AND_FOLLOW_4 = 'resteem done'; // change 
 
 const CHECK_NEW_COMMENTS_EVERY_N_MILLISECONS = 30 * 60 * 1000;  // 30  mins
 const OPEN_USER_LINK_TO_RESTEEM_EVERY_N_MILLISECONDS = 13 * 1000; // 13 seconds
+
+const PLATFORM_URL = 'https://steemit.com/';
+
+const REMOVE_ERRORS_EVERY_NEW_RUN = true;
 
 // CHANGE THESE ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 // =========================================================================
@@ -279,7 +283,7 @@ async function readComments(k) {
 
       const rightLink = anchor.href && anchor.href.split('/').length > 4 && notMine(anchor);
       const parent = anchor.offsetParent && anchor.offsetParent.id;
-      if (anchor.href && anchor.href.indexOf('https://steemit.com/') !== -1
+      if (anchor.href && anchor.href.indexOf(PLATFORM_URL) !== -1
           && parent && rightLink) {
         try {
           const parentArr = parent.split('/');
@@ -373,6 +377,8 @@ async function replyToPost(k) {
 
 let intervalValueRul;
 async function startResteems() {
+  REMOVE_ERRORS_EVERY_NEW_RUN && removeErrors();
+
   let idx = 0;
   if(users.length) {
     logsOn && console.debug('==========> Launching all resteems..!');
@@ -681,9 +687,9 @@ const start = () => {
     return;
   }
   const currentLocation = window.location.href;
-  if (currentLocation.indexOf('https://steemit.com') == -1
+  if (currentLocation.indexOf(PLATFORM_URL) == -1
     || currentLocation.indexOf(ACCOUNT_NAME) == -1) {
-    alert(`Error!\n\n${ACCOUNT_NAME} you have to run this script on Steemit, on your newly created post..`);
+    alert(`Error!\n\n${ACCOUNT_NAME} you have to run this script on ${PLATFORM_URL}, on your newly created post..`);
     return;
   }
   localStorage.setItem('dailyScriptBot_result', '0');
@@ -705,8 +711,6 @@ document['ation'] = `
         // PS. addUpvotedUserManual('user', 'https..')
 
   // SPECIAL_TREAT_TO_FIRSTCOMERS = false;
-  // HOW_MANY_FIRSTCOMERS = 5;
-  // MAX_LINKS_PER_USER = 1;
-  ACCOUNT_NAME = 'YOUR_ACCOUNT_NAME_HERE'; // NO Edge..
+  ACCOUNT_NAME = 'YOUR_ACCOUNT_NAME_HERE';
   start();
 `;
