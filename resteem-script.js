@@ -52,7 +52,7 @@ const resteemedLinksOnThisPost = [];
 let lastRun = '';
 
 const storedBl = localStorage.getItem('blacklist-rs');
-const blacklist = storedBl ? storedBl.split(',') : ['resteem.bot'];
+const blacklist = storedBl ? storedBl.split(',') : ['resteem.bot','cheetah','tipu','yougotresteemed'];
 
 
 // ================================ UTILITIES
