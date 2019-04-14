@@ -8,9 +8,9 @@ let ACCOUNT_NAME = 'YOUR_ACCOUNT_NAME_HERE' // ( eg. gaottantacinque - no @ ) <<
 let logsOn = false;
 
 let NO_REPLY_TO_COMMENTERS = false;
-const COMMENT_AFTER_RESTEEMS_1 = `RESTEEMS done so far, thanks! :D`;
-const COMMENT_AFTER_RESTEEMS_2 = `RESTEEM done! Thanks for using my free resteem service! :)`;
-const COMMENT_AFTER_RESTEEMS_3 = `All RESTEEMS done until here, thanks!`
+const COMMENT_AFTER_RESTEEMS_1 = `RESTEEMS done so far, will search again in a bit. Thanks! :D`;
+const COMMENT_AFTER_RESTEEMS_2 = `Comments processed! Thanks for using my free resteem service! :)`;
+const COMMENT_AFTER_RESTEEMS_3 = `RESTEEMS done until here, thanks!`
 const EACH_BROWSER_DIFFERENT_COMMENT = true;
 const MENTION_USERS_IN_SEPARATORS = true;
 const DELETE_OLD_SEPARATOR_WHEN_NEW_COMMENTS = false;
@@ -283,7 +283,7 @@ async function readComments(k) {
 
       const rightLink = anchor.href && anchor.href.split('/').length > 4 && notMine(anchor);
       const parent = anchor.offsetParent && anchor.offsetParent.id;
-      if (anchor.href && anchor.href.indexOf(PLATFORM_URL) !== -1
+      if (anchor.href && (anchor.href.indexOf(PLATFORM_URL) !== -1 || anchor.href.indexOf('partiko.app') !== -1 || anchor.href.indexOf('busy.org') !== -1)
           && parent && rightLink) {
         try {
           const parentArr = parent.split('/');
@@ -300,7 +300,7 @@ async function readComments(k) {
               const userAlias = `${user}${id > 0 ? `~${id}` : ''}`; // user, user~1, user~2
               const link = anchor.href;
               if (!added && toResteem[userAlias] == undefined
-                  && link.indexOf('@resteem.bot') == -1 && link.indexOf('resteem-bot-as') == -1 && link.indexOf('@rcr.bis') == -1 && link.indexOf('/re-') == -1
+                  && link.indexOf('@resteem.bot') == -1 && link.indexOf('resteem-bot-as') == -1 && link.indexOf('@rcr.bis') == -1 && link.indexOf('/re-') == -1 && link.indexOf('/referral/') == -1
                   && link.indexOf('/trending/') == -1 && link.indexOf('/byteball/') == -1 && link.indexOf('/created/') == -1 && link.indexOf('RESTEEMS_LEFT') === -1) {
                 toResteem[userAlias] = anchor.href;
                 added = true;
