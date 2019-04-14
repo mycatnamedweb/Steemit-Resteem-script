@@ -502,7 +502,8 @@ async function execService(user = '', link) {
       logsOn && console.debug(`${now()} -- Unathorized link. Skipping.`);
       return;
     }
-    w = open(link);
+    const cleanLink = link.replace('partiko.app', 'steemit.com').replace('busy.org', 'steemit.com');
+    w = open(cleanLink);
     await nap(5000);
 
     const userInFirstTen_index = firstTenToUpvAndFollow.indexOf(user);
